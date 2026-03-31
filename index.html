@@ -25,23 +25,78 @@
   styles.css
   Rich Premium Dark Theme / Glassmorphism
 */
+/* CSS Variables for Core UI */
 :root {
-  --primary-color: #10b981; /* Emerald 500 */
-  --primary-color-hover: #059669; /* Emerald 600 */
-  --secondary-color: rgba(255, 255, 255, 0.1);
-  --background-color: #09090b; /* Zinc 950 */
-  --surface-color: rgba(24, 24, 27, 0.65); /* Zinc 900 glass */
-  --surface-hover: rgba(39, 39, 42, 0.85);
-  --text-primary: #f4f4f5; /* Zinc 50 */
-  --text-secondary: #a1a1aa; /* Zinc 400 */
-  --danger-color: #ef4444; /* Red 500 */
-  
   --border-radius-lg: 24px;
   --border-radius-md: 16px;
   
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Theme: Emerald Dark (Default) */
+:root[data-theme="emerald"] {
+  --primary-color: #10b981; 
+  --primary-color-hover: #059669; 
+  --primary-color-glow: rgba(16, 185, 129, 0.39);
+  --secondary-color: rgba(255, 255, 255, 0.1);
+  --background-color: #09090b; 
+  --surface-color: rgba(24, 24, 27, 0.65); 
+  --surface-hover: rgba(39, 39, 42, 0.85);
+  --text-primary: #f4f4f5; 
+  --text-secondary: #a1a1aa; 
+  --danger-color: #ef4444; 
+  --bg-gradient: radial-gradient(circle at 15% 50%, rgba(16, 185, 129, 0.12), transparent 25%), radial-gradient(circle at 85% 30%, rgba(5, 150, 105, 0.12), transparent 25%);
+  --option-bg: #18181b;
+}
+
+/* Theme: Botanical Light */
+:root[data-theme="light-leaf"] {
+  --primary-color: #16a34a; 
+  --primary-color-hover: #15803d; 
+  --primary-color-glow: rgba(22, 163, 74, 0.39);
+  --secondary-color: rgba(0, 0, 0, 0.06);
+  --background-color: #f0fdf4; 
+  --surface-color: rgba(255, 255, 255, 0.75); 
+  --surface-hover: rgba(255, 255, 255, 0.95);
+  --text-primary: #14532d; 
+  --text-secondary: #475569; 
+  --danger-color: #dc2626; 
+  --bg-gradient: radial-gradient(circle at 15% 50%, rgba(22, 163, 74, 0.08), transparent 25%), radial-gradient(circle at 85% 30%, rgba(21, 128, 61, 0.05), transparent 25%);
+  --option-bg: #fff;
+}
+
+/* Theme: Sunset Amber */
+:root[data-theme="amber"] {
+  --primary-color: #f59e0b; 
+  --primary-color-hover: #d97706; 
+  --primary-color-glow: rgba(245, 158, 11, 0.39);
+  --secondary-color: rgba(255, 255, 255, 0.1);
+  --background-color: #1a1510; 
+  --surface-color: rgba(30, 25, 20, 0.65); 
+  --surface-hover: rgba(45, 38, 30, 0.85);
+  --text-primary: #fffbeb; 
+  --text-secondary: #d4d4d8; 
+  --danger-color: #ef4444; 
+  --bg-gradient: radial-gradient(circle at 15% 50%, rgba(245, 158, 11, 0.12), transparent 25%), radial-gradient(circle at 85% 30%, rgba(217, 119, 6, 0.12), transparent 25%);
+  --option-bg: #1a1510;
+}
+
+/* Theme: Ocean Blue */
+:root[data-theme="ocean"] {
+  --primary-color: #3b82f6; 
+  --primary-color-hover: #2563eb; 
+  --primary-color-glow: rgba(59, 130, 246, 0.39);
+  --secondary-color: rgba(255, 255, 255, 0.1);
+  --background-color: #020617; 
+  --surface-color: rgba(15, 23, 42, 0.65); 
+  --surface-hover: rgba(30, 41, 59, 0.85);
+  --text-primary: #f8fafc; 
+  --text-secondary: #94a3b8; 
+  --danger-color: #ef4444; 
+  --bg-gradient: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.12), transparent 25%), radial-gradient(circle at 85% 30%, rgba(37, 99, 235, 0.12), transparent 25%);
+  --option-bg: #020617;
 }
 
 * {
@@ -53,8 +108,7 @@
 body {
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--background-color);
-  background-image: radial-gradient(circle at 15% 50%, rgba(16, 185, 129, 0.12), transparent 25%),
-                    radial-gradient(circle at 85% 30%, rgba(5, 150, 105, 0.12), transparent 25%);
+  background-image: var(--bg-gradient);
   background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
@@ -109,10 +163,10 @@ h2 { font-size: 1.25rem; }
 .btn-primary {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-color-hover));
   color: #fff;
-  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
+  box-shadow: 0 4px 14px 0 var(--primary-color-glow);
 }
 .btn-primary:hover {
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.23);
+  box-shadow: 0 6px 20px var(--primary-color-glow);
   transform: translateY(-2px);
 }
 
@@ -161,7 +215,7 @@ select.form-control {
 }
 
 select option {
-  background-color: var(--background-color);
+  background-color: var(--option-bg);
   color: var(--text-primary);
 }
 
@@ -314,6 +368,13 @@ select option {
 
 </head>
 <body>
+  <script>
+    (function() {
+      // Load saved theme immediately to prevent flashing
+      var saved = localStorage.getItem('app_ui_theme') || 'emerald';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
   <div id="root"></div>
   
   <script type="text/babel">
@@ -373,7 +434,7 @@ function dataURLtoBlob(dataurl) {
 
 // --- Components ---
 
-function Settings({ settings, reloadData, existentCategories }) {
+function Settings({ settings, reloadData, existentCategories, currentTheme, onChangeTheme }) {
   const [newName, setNewName] = useState("");
   const [newCategory, setNewCategory] = useState("共通");
 
@@ -408,11 +469,29 @@ function Settings({ settings, reloadData, existentCategories }) {
   };
 
   return (
-    <div className="glass container p-4">
-      <h2>管理項目設定</h2>
-      <p className="text-secondary mb-4">形質評価ログで記録する項目を設定します。</p>
-      
-      <div className="form-group flex gap-2">
+    <div className="container p-4">
+      <div className="glass card mb-4">
+        <h2 className="mb-2">デザインテーマ設定</h2>
+        <p className="text-secondary mb-4" style={{fontSize: '0.875rem'}}>お好みのカラーテーマを選択してください。</p>
+        <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+          {[{id: 'emerald', label: 'エメラルド (Dark)'}, {id: 'light-leaf', label: 'ボタニカル (Light)'}, {id: 'amber', label: 'アンバー (Dark)'}, {id: 'ocean', label: 'オーシャン (Dark)'}].map(t => (
+             <button 
+                key={t.id} 
+                onClick={() => onChangeTheme(t.id)}
+                className={`btn ${currentTheme === t.id ? 'btn-primary' : 'btn-secondary'}`}
+                style={{flex: '1 1 calc(50% - 8px)', padding: '12px', fontSize: '0.875rem'}}
+             >
+                {t.label}
+             </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="glass card">
+        <h2>管理項目設定</h2>
+        <p className="text-secondary mb-4" style={{fontSize: '0.875rem'}}>形質評価ログで記録する項目を設定します。</p>
+        
+        <div className="form-group flex gap-2">
         <select 
           className="form-control" 
           style={{width: '120px', padding: '0 12px', flexShrink: 0}} 
@@ -470,6 +549,7 @@ function Settings({ settings, reloadData, existentCategories }) {
         ))}
         {settings.length === 0 && <p className="text-secondary">設定項目がありません。</p>}
       </div>
+    </div>
     </div>
   );
 }
@@ -864,6 +944,13 @@ function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // UI Theme Setting
+  const [theme, setTheme] = useState(() => localStorage.getItem('app_ui_theme') || 'emerald');
+  useEffect(() => {
+     localStorage.setItem('app_ui_theme', theme);
+     document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   const [individuals, setIndividuals] = useState([]);
   const [traitLogs, setTraitLogs] = useState([]);
   const [settings, setSettings] = useState([]);
@@ -943,10 +1030,30 @@ function App() {
 
   return (
     <div>
+      {/* App Header */}
+      <div style={{
+        padding: '16px', 
+        background: 'var(--surface-color)', 
+        backdropFilter: 'blur(20px)', 
+        borderBottom: '1px solid rgba(255,255,255,0.08)', 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 50, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        gap: '8px'
+      }}>
+         <Icon name="feather" color="var(--primary-color)" />
+         <span style={{fontWeight: 800, fontSize: '1.25rem', letterSpacing: '1px'}}>
+           Botanical Breed
+         </span>
+      </div>
+
       {/* Main Content Area */}
       <div style={{minHeight: '100vh', paddingBottom: '90px'}}>
         {currentTab === "dashboard" && <Dashboard individuals={individuals} onSelect={id => { setSelectedId(id); setCurrentTab("detail"); }} onNew={() => setCurrentTab("new")} />}
-        {currentTab === "settings" && <Settings settings={settings} reloadData={fetchData} existentCategories={Array.from(new Set(individuals.map(i => i.category).filter(Boolean)))} />}
+        {currentTab === "settings" && <Settings settings={settings} reloadData={fetchData} currentTheme={theme} onChangeTheme={setTheme} existentCategories={Array.from(new Set(individuals.map(i => i.category).filter(Boolean)))} />}
         {currentTab === "new" && (
            <div className="container" style={{paddingTop: '24px'}}>
              <IndividualForm onSave={saveIndividual} onCancel={() => setCurrentTab("dashboard")} individuals={individuals} />
