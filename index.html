@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>園芸・交配記録アプリ</title>
+  <title>Botanical Breed - 交配記録</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,78 +25,26 @@
   styles.css
   Rich Premium Dark Theme / Glassmorphism
 */
-/* CSS Variables for Core UI */
+/* CSS Variables for Clean Modern UI (Apple/Linear Style) */
 :root {
-  --border-radius-lg: 24px;
-  --border-radius-md: 16px;
+  --primary-color: #111827; /* Near Black */
+  --primary-color-hover: #374151;
+  --accent-color: #059669; /* Emerald for plant accents */
+  --background-color: #f9fafb; /* gray-50 */
+  --surface-color: #ffffff; 
+  --surface-hover: #f3f4f6;
+  --text-primary: #111827; 
+  --text-secondary: #6b7280; 
+  --border-color: #e5e7eb;
+  --danger-color: #ef4444; 
   
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-}
-
-/* Theme: Emerald Dark (Default) */
-:root[data-theme="emerald"] {
-  --primary-color: #10b981; 
-  --primary-color-hover: #059669; 
-  --primary-color-glow: rgba(16, 185, 129, 0.39);
-  --secondary-color: rgba(255, 255, 255, 0.1);
-  --background-color: #09090b; 
-  --surface-color: rgba(24, 24, 27, 0.65); 
-  --surface-hover: rgba(39, 39, 42, 0.85);
-  --text-primary: #f4f4f5; 
-  --text-secondary: #a1a1aa; 
-  --danger-color: #ef4444; 
-  --bg-gradient: radial-gradient(circle at 15% 50%, rgba(16, 185, 129, 0.12), transparent 25%), radial-gradient(circle at 85% 30%, rgba(5, 150, 105, 0.12), transparent 25%);
-  --option-bg: #18181b;
-}
-
-/* Theme: Botanical Light */
-:root[data-theme="light-leaf"] {
-  --primary-color: #16a34a; 
-  --primary-color-hover: #15803d; 
-  --primary-color-glow: rgba(22, 163, 74, 0.39);
-  --secondary-color: rgba(0, 0, 0, 0.06);
-  --background-color: #f0fdf4; 
-  --surface-color: rgba(255, 255, 255, 0.75); 
-  --surface-hover: rgba(255, 255, 255, 0.95);
-  --text-primary: #14532d; 
-  --text-secondary: #475569; 
-  --danger-color: #dc2626; 
-  --bg-gradient: radial-gradient(circle at 15% 50%, rgba(22, 163, 74, 0.08), transparent 25%), radial-gradient(circle at 85% 30%, rgba(21, 128, 61, 0.05), transparent 25%);
-  --option-bg: #fff;
-}
-
-/* Theme: Sunset Amber */
-:root[data-theme="amber"] {
-  --primary-color: #f59e0b; 
-  --primary-color-hover: #d97706; 
-  --primary-color-glow: rgba(245, 158, 11, 0.39);
-  --secondary-color: rgba(255, 255, 255, 0.1);
-  --background-color: #1a1510; 
-  --surface-color: rgba(30, 25, 20, 0.65); 
-  --surface-hover: rgba(45, 38, 30, 0.85);
-  --text-primary: #fffbeb; 
-  --text-secondary: #d4d4d8; 
-  --danger-color: #ef4444; 
-  --bg-gradient: radial-gradient(circle at 15% 50%, rgba(245, 158, 11, 0.12), transparent 25%), radial-gradient(circle at 85% 30%, rgba(217, 119, 6, 0.12), transparent 25%);
-  --option-bg: #1a1510;
-}
-
-/* Theme: Ocean Blue */
-:root[data-theme="ocean"] {
-  --primary-color: #3b82f6; 
-  --primary-color-hover: #2563eb; 
-  --primary-color-glow: rgba(59, 130, 246, 0.39);
-  --secondary-color: rgba(255, 255, 255, 0.1);
-  --background-color: #020617; 
-  --surface-color: rgba(15, 23, 42, 0.65); 
-  --surface-hover: rgba(30, 41, 59, 0.85);
-  --text-primary: #f8fafc; 
-  --text-secondary: #94a3b8; 
-  --danger-color: #ef4444; 
-  --bg-gradient: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.12), transparent 25%), radial-gradient(circle at 85% 30%, rgba(37, 99, 235, 0.12), transparent 25%);
-  --option-bg: #020617;
+  --border-radius-lg: 16px;
+  --border-radius-md: 10px;
+  --border-radius-sm: 6px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
 }
 
 * {
@@ -106,23 +54,24 @@
 }
 
 body {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
   background-color: var(--background-color);
-  background-image: var(--bg-gradient);
-  background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Glassmorphism utility */
-.glass {
+/* Card utility */
+.card {
   background: var(--surface-color);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-glass);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
 }
 
 .container {
@@ -135,10 +84,11 @@ body {
 /* Typography */
 h1, h2, h3 {
   font-weight: 700;
-  margin-bottom: 12px;
+  letter-spacing: -0.025em;
+  margin-bottom: 8px;
 }
 h1 { font-size: 1.5rem; }
-h2 { font-size: 1.25rem; }
+h2 { font-size: 1.125rem; }
 
 /* Buttons */
 .btn {
@@ -147,36 +97,36 @@ h2 { font-size: 1.25rem; }
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 16px;
-  font-size: 1.125rem;
-  font-weight: 600;
-  border: none;
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border: 1px solid transparent;
   border-radius: var(--border-radius-md);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
 }
 
 .btn:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-hover));
-  color: #fff;
-  box-shadow: 0 4px 14px 0 var(--primary-color-glow);
+  background-color: var(--primary-color);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
 }
 .btn-primary:hover {
-  box-shadow: 0 6px 20px var(--primary-color-glow);
-  transform: translateY(-2px);
+  background-color: var(--primary-color-hover);
 }
 
 .btn-secondary {
-  background-color: var(--secondary-color);
+  background-color: #ffffff;
   color: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--surface-hover);
 }
 
 /* Forms */
@@ -368,13 +318,6 @@ select option {
 
 </head>
 <body>
-  <script>
-    (function() {
-      // Load saved theme immediately to prevent flashing
-      var saved = localStorage.getItem('app_ui_theme') || 'emerald';
-      document.documentElement.setAttribute('data-theme', saved);
-    })();
-  </script>
   <div id="root"></div>
   
   <script type="text/babel">
@@ -555,7 +498,7 @@ function Settings({ settings, reloadData, existentCategories, currentTheme, onCh
 }
 
 function IndividualForm({ onSave, onCancel, initialData, individuals }) {
-  const [data, setData] = useState(initialData || { name: "", category: "", status: "育成中", sowingDate: "", motherId: "", fatherId: "", memo: "", imageUrl: "" });
+  const [data, setData] = useState(initialData || { name: "", manageId: "", category: "", breed: "", status: "育成中", sowingDate: "", motherId: "", fatherId: "", memo: "", imageUrl: "" });
   const [imageLoading, setImageLoading] = useState(false);
 
   const existentCategories = Array.from(new Set(individuals.map(i => i.category).filter(Boolean)));
@@ -610,16 +553,26 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">種類 (カテゴリ) *</label>
-        <input required type="text" name="category" list="category-list" className="form-control" placeholder="例: アロエ、塊根植物" value={data.category || ""} onChange={handleChange} />
+        <label className="form-label">種類 (大カテゴリ) *</label>
+        <input required type="text" name="category" list="category-list" className="form-control" placeholder="例: アガベ、塊根植物" value={data.category || ""} onChange={handleChange} />
         <datalist id="category-list">
-          {existentCategories.map(c => <option key={c} value={c} />)}
+           {existentCategories.map(c => <option key={c} value={c} />)}
         </datalist>
       </div>
 
       <div className="form-group">
-        <label className="form-label">品種名 *</label>
-        <input required type="text" name="name" className="form-control" placeholder="例: ポリフィラ" value={data.name} onChange={handleChange} />
+        <label className="form-label">品種 *</label>
+        <input required type="text" name="breed" className="form-control" placeholder="例: チタノタ、オベサ" value={data.breed || ""} onChange={handleChange} />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">個体名 / 愛称 (任意)</label>
+        <input type="text" name="name" className="form-control" placeholder="例: 白鯨、特選株" value={data.name || ""} onChange={handleChange} />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">ユーザー管理番号 (任意)</label>
+        <input type="text" name="manageId" className="form-control" placeholder="例: EO-1" value={data.manageId || ""} onChange={handleChange} />
       </div>
 
       <div className="form-group">
@@ -710,18 +663,22 @@ function IndividualDetail({ id, individuals, traitLogs, settings, goBack, update
       
       {viewMode === "detail" && (
         <>
-          <div className="glass card">
+          <div className="card" style={{padding: '24px', marginBottom: '24px'}}>
             {individual.imageUrl && (
-              <img src={individual.imageUrl} alt={individual.name} style={{width: '100%', borderRadius: '12px', marginBottom: '16px', objectFit: 'cover'}} />
+              <img src={individual.imageUrl} alt={individual.name} style={{width: '100%', borderRadius: '12px', marginBottom: '16px', objectFit: 'cover'}} loading="lazy" />
             )}
-            <h1>{individual.name}</h1>
+            <h1>{individual.name || "(名前なし)"} <span style={{fontSize: '1rem', fontWeight: 500, color: 'var(--text-secondary)'}}>{individual.manageId ? `#${individual.manageId}` : ''}</span></h1>
             <p className="text-secondary mb-4">
-              {individual.category && <span className="badge">{individual.category}</span>}
-              ID: {individual.id} | ステータス: {individual.status}
+              {individual.category && <span style={{display: 'inline-block', backgroundColor: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.875rem', marginRight: '8px'}}>{individual.category}</span>}
+              {individual.breed && <span style={{display: 'inline-block', backgroundColor: 'var(--primary-color)', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.875rem', marginRight: '8px'}}>{individual.breed}</span>}
             </p>
-            <p><strong>播種日:</strong> {individual.sowingDate || "未設定"}</p>
-            <p><strong>母親 (♀):</strong> {mother ? mother.name : "不明"}</p>
-            <p><strong>父親 (♂):</strong> {father ? father.name : "不明"}</p>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px', fontSize: '0.9375rem'}}>
+              <div><strong>ステータス:</strong> {individual.status}</div>
+              <div><strong>播種日:</strong> {individual.sowingDate || "未設定"}</div>
+              <div><strong>母親 (♀):</strong> {mother ? mother.name : "不明"}</div>
+              <div><strong>父親 (♂):</strong> {father ? father.name : "不明"}</div>
+            </div>
+
             {individual.memo && <p className="mb-2"><strong>メモ:</strong><br/>{individual.memo}</p>}
           </div>
 
@@ -804,8 +761,12 @@ function IndividualDetail({ id, individuals, traitLogs, settings, goBack, update
                    </div>
                  )}
                  <div className="certificate-row">
-                    <span className="certificate-label">品種名</span>
-                    <span className="certificate-value">{individual.name} {individual.category && <span style={{fontSize: '0.8rem', backgroundColor: '#e2e8f0', padding: '2px 8px', borderRadius: '8px', color: '#4a5568', verticalAlign: 'middle', marginLeft: '6px'}}>{individual.category}</span>}</span>
+                    <span className="certificate-label">個体名</span>
+                    <span className="certificate-value">{individual.name || "(名前なし)"} {individual.breed && <span style={{fontSize: '0.8rem', backgroundColor: '#e2e8f0', padding: '2px 8px', borderRadius: '8px', color: '#4a5568', verticalAlign: 'middle', marginLeft: '6px'}}>{individual.breed}</span>}</span>
+                 </div>
+                 <div className="certificate-row">
+                    <span className="certificate-label">管理番号</span>
+                    <span className="certificate-value" style={{fontFamily: 'monospace'}}>{individual.manageId || "未設定"}</span>
                  </div>
                  <div className="certificate-row" style={{flexDirection: 'column', alignItems: 'center', borderBottom: 'none'}}>
                     <span className="certificate-label" style={{marginBottom: '16px'}}>交配親 (♀ × ♂)</span>
@@ -837,8 +798,8 @@ function IndividualDetail({ id, individuals, traitLogs, settings, goBack, update
                     <span className="certificate-value">{individual.sowingDate || "不明"}</span>
                  </div>
                  <div className="certificate-row">
-                    <span className="certificate-label">ID</span>
-                    <span className="certificate-value" style={{fontSize: '0.875rem', fontFamily: 'monospace'}}>{individual.id}</span>
+                    <span className="certificate-label">UUID</span>
+                    <span className="certificate-value" style={{fontSize: '0.75rem', fontFamily: 'monospace', color: '#a1a1aa'}}>{individual.id}</span>
                  </div>
                  <div style={{marginTop: '32px', textAlign: 'right', fontSize: '0.75rem', color: '#666'}}>
                      Issued by Breeding Management App
@@ -932,31 +893,57 @@ function Dashboard({ individuals, onSelect, onNew }) {
       </div>
 
       <div className="list">
-        {Object.keys(grouped).sort((a,b) => a === "未分類" ? 1 : b === "未分類" ? -1 : a.localeCompare(b)).map(cat => (
-          <div key={cat} style={{marginBottom: '32px'}}>
-             <h2 style={{fontSize: '1.25rem', color: 'var(--primary-color)', borderBottom: '2px solid rgba(255,255,255,0.05)', paddingBottom: '8px', marginBottom: '16px', fontWeight: 700}}>
-               {cat} <span style={{fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 400}}>({grouped[cat].length})</span>
-             </h2>
-             {grouped[cat].map(i => (
-                <div key={i.id} className="card glass flex items-center gap-4" onClick={() => onSelect(i.id)}>
-                   {i.imageUrl ? (
-                     <img src={i.imageUrl} style={{width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0}} />
-                   ) : (
-                     <div style={{width: '60px', height: '60px', borderRadius: '8px', background: 'var(--secondary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
-                         <Icon name="image" size={24} className="" />
-                     </div>
-                   )}
-                   <div style={{flex: 1}}>
-                       <h3 className="mb-2" style={{margin: 0, marginBottom: '4px'}}>{i.name}</h3>
-                       <div className="flex justify-between text-secondary" style={{fontSize: '0.875rem'}}>
-                         <span>{i.status}</span>
-                         <span>{i.sowingDate}</span>
+        {Object.keys(grouped).sort((a,b) => a === "未分類" ? 1 : b === "未分類" ? -1 : a.localeCompare(b)).map(cat => {
+          // 品種ごとにさらにグループ化
+          const breedGroups = {};
+          grouped[cat].forEach(i => {
+             const br = i.breed || "品種不明";
+             if(!breedGroups[br]) breedGroups[br] = [];
+             breedGroups[br].push(i);
+          });
+          
+          return (
+            <div key={cat} style={{marginBottom: '32px'}}>
+               <h2 style={{fontSize: '1.25rem', color: 'var(--primary-color)', borderBottom: '2px solid var(--border-color)', paddingBottom: '8px', marginBottom: '16px', fontWeight: 700}}>
+                 {cat} <span style={{fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 400}}>({grouped[cat].length})</span>
+               </h2>
+               
+               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                 {Object.keys(breedGroups).sort().map(br => (
+                    <details key={br} className="card" style={{padding: '0', overflow: 'hidden'}} open={Object.keys(breedGroups).length <= 2}>
+                       <summary style={{padding: '16px', fontWeight: 600, cursor: 'pointer', background: 'var(--surface-color)', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                         <span>{br} <span style={{color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 400, marginLeft: '8px'}}>{breedGroups[br].length}株</span></span>
+                         <Icon name="chevron-down" size={20} color="var(--text-secondary)" />
+                       </summary>
+                       <div style={{padding: '0 16px 16px 16px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                         {breedGroups[br].map(i => (
+                            <div key={i.id} className="card flex items-center gap-4" style={{padding: '12px', cursor: 'pointer', boxShadow: 'none', border: '1px solid var(--border-color)'}} onClick={() => onSelect(i.id)}>
+                               {i.imageUrl ? (
+                                 <img src={i.imageUrl} style={{width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0}} loading="lazy" />
+                               ) : (
+                                 <div style={{width: '60px', height: '60px', borderRadius: '8px', background: 'var(--surface-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
+                                     <Icon name="image" size={24} color="var(--text-secondary)" />
+                                 </div>
+                               )}
+                               <div style={{flex: 1}}>
+                                   <div style={{display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px'}}>
+                                     <h3 style={{margin: 0, fontSize: '1rem'}}>{i.name || "(名前なし)"}</h3>
+                                     <span style={{fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500}}>{i.manageId ? `#${i.manageId}` : ''}</span>
+                                   </div>
+                                   <div className="flex justify-between text-secondary" style={{fontSize: '0.8125rem'}}>
+                                     <span>{i.status}</span>
+                                     <span>{i.sowingDate}</span>
+                                   </div>
+                               </div>
+                            </div>
+                         ))}
                        </div>
-                   </div>
-                </div>
-             ))}
-          </div>
-        ))}
+                    </details>
+                 ))}
+               </div>
+            </div>
+          );
+        })}
         {filtered.length === 0 && <p className="text-center text-secondary">登録データがありません。</p>}
       </div>
     </div>
@@ -988,7 +975,7 @@ function App() {
     ]);
     
     if (indRes.data) {
-       setIndividuals(indRes.data.map(i => ({...i, sowingDate: i.sowing_date, motherId: i.mother_id, fatherId: i.father_id, imageUrl: i.image_url})));
+       setIndividuals(indRes.data.map(i => ({...i, breed: i.breed, manageId: i.manage_id, sowingDate: i.sowing_date, motherId: i.mother_id, fatherId: i.father_id, imageUrl: i.image_url})));
     }
     if (logRes.data) {
        setTraitLogs(logRes.data.map(l => ({...l, individualId: l.individual_id, recordDate: l.record_date, traitName: l.trait_name, note: l.notes})));
@@ -1017,7 +1004,9 @@ function App() {
   const saveIndividual = async (data) => {
     const dbData = {
       name: data.name,
+      manage_id: data.manageId || null,
       category: data.category,
+      breed: data.breed || null,
       status: data.status,
       sowing_date: data.sowingDate || null,
       mother_id: data.motherId || null,
