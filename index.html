@@ -903,12 +903,13 @@ function Dashboard({ individuals, onSelect, onNew }) {
           });
           
           return (
-            <div key={cat} style={{marginBottom: '32px'}}>
-               <h2 style={{fontSize: '1.25rem', color: 'var(--primary-color)', borderBottom: '2px solid var(--border-color)', paddingBottom: '8px', marginBottom: '16px', fontWeight: 700}}>
-                 {cat} <span style={{fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 400}}>({grouped[cat].length})</span>
-               </h2>
+            <details key={cat} style={{marginBottom: '24px'}} open={true}>
+               <summary style={{fontSize: '1.25rem', color: 'var(--primary-color)', borderBottom: '2px solid var(--border-color)', paddingBottom: '8px', marginBottom: '16px', fontWeight: 700, cursor: 'pointer', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                 <span>{cat} <span style={{fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 400, marginLeft: '4px'}}>({grouped[cat].length}株)</span></span>
+                 <Icon name="chevron-down" size={24} color="var(--text-secondary)" />
+               </summary>
                
-               <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+               <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px'}}>
                  {Object.keys(breedGroups).sort().map(br => (
                     <details key={br} className="card" style={{padding: '0', overflow: 'hidden'}} open={Object.keys(breedGroups).length <= 2}>
                        <summary style={{padding: '16px', fontWeight: 600, cursor: 'pointer', background: 'var(--surface-color)', outline: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
@@ -941,7 +942,7 @@ function Dashboard({ individuals, onSelect, onNew }) {
                     </details>
                  ))}
                </div>
-            </div>
+            </details>
           );
         })}
         {filtered.length === 0 && <p className="text-center text-secondary">登録データがありません。</p>}
