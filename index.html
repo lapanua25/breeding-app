@@ -313,7 +313,15 @@ select option {
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
 .gap-2 { gap: 8px; }
-.gap-4 { gap: 16px; }  
+.gap-4 { gap: 16px; }
+
+/* Accordion interaction styles */
+details summary .feather-chevron-down {
+  transition: transform 0.3s ease-in-out;
+}
+details[open] > summary .feather-chevron-down {
+  transform: rotate(180deg);
+}
   </style>
 
 </head>
