@@ -957,12 +957,73 @@ function Dashboard({ individuals, onSelect, onNew }) {
       </div>
     </div>
   );
+function Auth() {
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(true);
+
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    let error;
+    if (isLogin) {
+      const res = await supabaseClient.auth.signInWithPassword({ email, password });
+      error = res.error;
+    } else {
+      const res = await supabaseClient.auth.signUp({ email, password });
+      error = res.error;
+      if (!error) alert("アカウントが作成されました！");
+    }
+    setLoading(false);
+    if (error) alert("エラー: " + error.message);
+  };
+
+  return (
+    <div style={{display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: '16px'}}>
+       <div className="card" style={{width: '100%', maxWidth: '400px', padding: '32px'}}>
+          <div style={{textAlign: 'center', marginBottom: '32px'}}>
+             <Icon name="feather" size={48} color="var(--primary-color)" />
+             <h1 style={{marginTop: '16px'}}>Botanical Breed</h1>
+             <p className="text-secondary" style={{fontSize: '0.875rem'}}>商用SaaS版プロトタイプ</p>
+          </div>
+          <form onSubmit={handleAuth}>
+             <div className="form-group">
+                <label className="form-label">メールアドレス</label>
+                <input required type="email" className="form-control" value={email} onChange={e => setEmail(e.target.value)} />
+             </div>
+             <div className="form-group">
+                <label className="form-label">パスワード (6文字以上)</label>
+                <input required type="password" minLength="6" className="form-control" value={password} onChange={e => setPassword(e.target.value)} />
+             </div>
+             <button type="submit" className="btn btn-primary" style={{width: '100%', marginTop: '8px'}} disabled={loading}>
+                {loading ? "通信中..." : (isLogin ? "ログインして始める" : "新規アカウント作成")}
+             </button>
+          </form>
+          <div style={{textAlign: 'center', marginTop: '24px'}}>
+             <button style={{background: 'none', border: 'none', color: 'var(--text-secondary)', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.875rem'}} onClick={() => setIsLogin(!isLogin)}>
+                {isLogin ? "パスワードを作って新規登録する" : "すでにアカウントをお持ちの方はこちら"}
+             </button>
+          </div>
+       </div>
+    </div>
+  );
 }
 
 function App() {
+  const [session, setSession] = useState(null);
   const [currentTab, setCurrentTab] = useState("dashboard"); // dashboard, new, detail, settings
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, []);
 
   // UI Theme Setting
   const [theme, setTheme] = useState(() => localStorage.getItem('app_ui_theme') || 'emerald');
@@ -1007,8 +1068,11 @@ function App() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (session) {
+      fetchData();
+    }
+  }, [session]);
+
 
   const saveIndividual = async (data) => {
     const dbData = {
@@ -1046,30 +1110,38 @@ function App() {
     await fetchData();
   };
 
+  if (!session) {
+     return <Auth />;
+  }
+
   if (loading && individuals.length === 0) {
     return <div style={{display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center'}}>データを読み込み中...</div>;
   }
 
+
   return (
     <div>
-      {/* App Header */}
       <div style={{
         padding: '16px', 
         background: 'var(--surface-color)', 
-        backdropFilter: 'blur(20px)', 
-        borderBottom: '1px solid rgba(255,255,255,0.08)', 
+        borderBottom: '1px solid var(--border-color)', 
         position: 'sticky', 
         top: 0, 
         zIndex: 50, 
         display: 'flex', 
         alignItems: 'center', 
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         gap: '8px'
       }}>
-         <Icon name="feather" color="var(--primary-color)" />
-         <span style={{fontWeight: 800, fontSize: '1.25rem', letterSpacing: '1px'}}>
-           Botanical Breed
-         </span>
+         <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+           <Icon name="feather" color="var(--primary-color)" />
+           <span style={{fontWeight: 800, fontSize: '1.125rem'}}>
+             Botanical Breed
+           </span>
+         </div>
+         <button className="btn btn-secondary" style={{width: 'auto', padding: '6px 12px', fontSize: '0.75rem'}} onClick={() => supabaseClient.auth.signOut()}>
+           ログアウト
+         </button>
       </div>
 
       {/* Main Content Area */}
