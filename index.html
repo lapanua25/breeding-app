@@ -833,6 +833,7 @@ function IndividualDetail({ id, individuals, traitLogs, settings, goBack, update
 
 function Dashboard({ individuals, onSelect, onNew }) {
   const [search, setSearch] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const categories = useMemo(() => Array.from(new Set(individuals.map(i => i.category).filter(Boolean))), [individuals]);
 
@@ -880,24 +881,34 @@ function Dashboard({ individuals, onSelect, onNew }) {
       </div>
 
       <div className="glass p-4 card" style={{marginBottom: '24px'}}>
-        <div className="form-group mb-4">
-          <input 
-            type="text" 
-            className="form-control" 
-            placeholder="品種名やIDで検索..." 
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+           <button className={`btn ${isSearchOpen ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setIsSearchOpen(!isSearchOpen)} style={{padding: '8px 12px', width: 'auto'}} title="検索">
+              <Icon name="search" size={20} /> 検索
+           </button>
+           <button className="btn btn-primary" onClick={onNew} style={{width: 'auto'}}><Icon name="plus" size={20} /> 新規登録</button>
         </div>
+
+        {isSearchOpen && (
+          <div className="form-group mb-4" style={{animation: 'fadeIn 0.3s ease', margin: '0 -8px'}}>
+            <input 
+              type="text" 
+              className="form-control" 
+              placeholder="品種名や個体名で検索..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
+        )}
+
         {categories.length > 0 && (
-          <div className="flex gap-2 mb-4" style={{overflowX: 'auto', paddingBottom: '8px'}}>
+          <div className="flex gap-2" style={{overflowX: 'auto', paddingBottom: '8px', margin: '0 -8px', padding: '0 8px'}}>
             <button className={`category-tab ${selectedCategory === "" ? "active" : ""}`} onClick={() => setSelectedCategory("")}>すべて</button>
             {categories.map(c => (
               <button key={c} className={`category-tab ${selectedCategory === c ? "active" : ""}`} onClick={() => setSelectedCategory(c)}>{c}</button>
             ))}
           </div>
         )}
-        <button className="btn btn-primary" onClick={onNew}><Icon name="plus" /> 新規登録</button>
       </div>
 
       <div className="list">
