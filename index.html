@@ -385,13 +385,13 @@ function dataURLtoBlob(dataurl) {
 
 // --- Components ---
 
-function Settings({ settings, reloadData, existentCategories, currentTheme, onChangeTheme }) {
+function Settings({ settings, reloadData, existentCategories, currentTheme, onChangeTheme, userId }) {
   const [newName, setNewName] = useState("");
   const [newCategory, setNewCategory] = useState("共通");
 
   const addSetting = async () => {
     if (!newName.trim()) return;
-    await supabaseClient.from('settings').insert({ trait_name: newName.trim(), is_active: true, category: newCategory });
+    await supabaseClient.from('settings').insert({ trait_name: newName.trim(), is_active: true, category: newCategory, user_id: userId });
     setNewName("");
     reloadData();
   };
@@ -1056,9 +1056,9 @@ function App() {
        if (setRes.data.length === 0) {
           // 初期設定データ
           const defaults = [
-            { trait_name: "棘の鋭さ", is_active: true, category: "共通" },
-            { trait_name: "葉の色", is_active: true, category: "共通" },
-            { trait_name: "形のバランス", is_active: true, category: "共通" }
+            { trait_name: "棘の鋭さ", is_active: true, category: "共通", user_id: session.user.id },
+            { trait_name: "葉の色", is_active: true, category: "共通", user_id: session.user.id },
+            { trait_name: "形のバランス", is_active: true, category: "共通", user_id: session.user.id }
           ];
           await supabaseClient.from('settings').insert(defaults);
           fetchData(); 
@@ -1087,7 +1087,8 @@ function App() {
       mother_id: data.motherId || null,
       father_id: data.fatherId || null,
       memo: data.memo,
-      image_url: data.imageUrl
+      image_url: data.imageUrl,
+      user_id: session.user.id
     };
 
     if (data.id) {
@@ -1106,7 +1107,8 @@ function App() {
        record_date: data.recordDate,
        trait_name: data.traitName,
        score: data.score,
-       notes: data.note
+       notes: data.note,
+       user_id: session.user.id
     };
     await supabaseClient.from('trait_logs').insert(dbData);
     await fetchData();
@@ -1149,7 +1151,7 @@ function App() {
       {/* Main Content Area */}
       <div style={{minHeight: '100vh', paddingBottom: '90px'}}>
         {currentTab === "dashboard" && <Dashboard individuals={individuals} onSelect={id => { setSelectedId(id); setCurrentTab("detail"); }} onNew={() => setCurrentTab("new")} />}
-        {currentTab === "settings" && <Settings settings={settings} reloadData={fetchData} currentTheme={theme} onChangeTheme={setTheme} existentCategories={Array.from(new Set(individuals.map(i => i.category).filter(Boolean)))} />}
+        {currentTab === "settings" && <Settings settings={settings} reloadData={fetchData} currentTheme={theme} onChangeTheme={setTheme} existentCategories={Array.from(new Set(individuals.map(i => i.category).filter(Boolean)))} userId={session.user.id} />}
         {currentTab === "new" && (
            <div className="container" style={{paddingTop: '24px'}}>
              <IndividualForm onSave={saveIndividual} onCancel={() => setCurrentTab("dashboard")} individuals={individuals} />
