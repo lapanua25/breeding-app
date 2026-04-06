@@ -309,11 +309,50 @@ select option {
   color: white;
   border-color: var(--primary-color);
 }
-.flex { display: flex; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.gap-2 { gap: 8px; }
 .gap-4 { gap: 16px; }
+
+/* Timeline styles */
+.timeline {
+  position: relative;
+  padding-left: 32px;
+  margin-top: 24px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--secondary-color);
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 32px;
+}
+.timeline-dot {
+  position: absolute;
+  left: -24px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  border: 4px solid var(--background-color);
+  z-index: 10;
+}
+.timeline-date {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+.timeline-content {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px;
+}
 
 /* Accordion interaction styles */
 details summary .feather-chevron-down {
@@ -630,25 +669,55 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
   );
 }
 
-function IndividualDetail({ id, individuals, traitLogs, settings, goBack, updateIndividual, addTraitLog }) {
-  const [viewMode, setViewMode] = useState("detail"); // detail, traitForm
+function IndividualDetail({ id, individuals, traitLogs, settings, individualImages, goBack, updateIndividual, addTraitLog, addTimelineImage, deleteTimelineImage }) {
+  const [viewMode, setViewMode] = useState("detail"); // detail, traitForm, timelineForm, pedigree, certificate
   const individual = individuals.find(i => i.id === id);
   const activeSettings = settings.filter(s => s.isActive && (!s.category || s.category === "共通" || s.category === individual?.category));
   const logs = traitLogs.filter(t => t.individualId === id).sort((a,b) => new Date(b.recordDate) - new Date(a.recordDate));
+  const timeline = (individualImages || []).filter(img => img.individualId === id).sort((a,b) => new Date(b.recordDate) - new Date(a.recordDate));
   
   if (!individual) return <div>見つかりません</div>;
 
   const mother = individuals.find(i => i.id === individual.motherId);
   const father = individuals.find(i => i.id === individual.fatherId);
 
-  // Trait Form State
+  // Form States
   const [traitData, setTraitData] = useState({ recordDate: new Date().toISOString().split('T')[0], traitName: activeSettings[0]?.traitName || "", score: "3", note: "" });
+  const [timelineData, setTimelineData] = useState({ recordDate: new Date().toISOString().split('T')[0], imageUrl: "", notes: "" });
+  const [imageLoading, setImageLoading] = useState(false);
 
   const handleTraitSubmit = (e) => {
     e.preventDefault();
     if (!traitData.traitName) return alert("評価項目が設定されていません");
     addTraitLog({ ...traitData, individualId: id });
     setViewMode("detail");
+  };
+
+  const handleTimelineSubmit = async (e) => {
+    e.preventDefault();
+    if (!timelineData.imageUrl) return alert("画像を選択してください");
+    await addTimelineImage({ ...timelineData, individualId: id });
+    setTimelineData({ recordDate: new Date().toISOString().split('T')[0], imageUrl: "", notes: "" });
+    setViewMode("detail");
+  };
+
+  const handleTimelineImageChange = async (e) => {
+    const file = e.target.files[0];
+    if(file) {
+      setImageLoading(true);
+      try {
+        const compressedBase64 = await compressImage(file, 800, 800, 0.7);
+        const blob = dataURLtoBlob(compressedBase64);
+        const fileName = `timeline_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
+        const { data: uploadData, error } = await supabaseClient.storage.from('images').upload(fileName, blob, { contentType: 'image/jpeg' });
+        if (error) throw error;
+        const publicUrl = supabaseClient.storage.from('images').getPublicUrl(fileName).data.publicUrl;
+        setTimelineData({ ...timelineData, imageUrl: publicUrl });
+      } catch(err) {
+        alert("アップロード失敗: " + err.message);
+      }
+      setImageLoading(false);
+    }
   };
 
   const renderPedigreeNode = (nodeId, label, depth = 0) => {
@@ -691,13 +760,40 @@ function IndividualDetail({ id, individuals, traitLogs, settings, goBack, update
           </div>
 
           <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px'}}>
-             <button className="btn btn-primary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("traitForm")}><Icon name="plus" size={18}/> 評価追加</button>
+             <button className="btn btn-primary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("traitForm")}><Icon name="star" size={18}/> 評価</button>
+             <button className="btn btn-primary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("timelineForm")}><Icon name="camera" size={18}/> 写真</button>
              <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("editForm")}><Icon name="edit-2" size={18}/> 編集</button>
-             <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("pedigree")}><Icon name="git-merge" size={18}/> 家系図</button>
-             <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("certificate")}><Icon name="award" size={18}/> 証明</button>
+             <button className="btn btn-secondary" style={{flex: '2 1 auto', padding: '8px', fontSize: '0.875rem'}} onClick={() => setViewMode("pedigree")}><Icon name="git-merge" size={14}/> 家系図</button>
+             <button className="btn btn-secondary" style={{flex: '2 1 auto', padding: '8px', fontSize: '0.875rem'}} onClick={() => setViewMode("certificate")}><Icon name="award" size={14}/> 証明</button>
           </div>
 
-          <h3 className="mb-2">評価ログ</h3>
+          <h3 className="mb-4">成長タイムライン</h3>
+          <div className="timeline">
+            <div className="timeline-item">
+              <div className="timeline-dot"></div>
+              <div className="timeline-date">{individual.sowingDate || "播種日不明"} (登録時)</div>
+              <div className="timeline-content">
+                {individual.imageUrl && <img src={individual.imageUrl} style={{width: '100%', borderRadius: '8px', marginBottom: '8px'}} loading="lazy" />}
+                <p style={{fontSize: '0.875rem'}}>{individual.memo || "最初の一歩。"}</p>
+              </div>
+            </div>
+            {timeline.map(item => (
+              <div key={item.id} className="timeline-item">
+                <div className="timeline-dot"></div>
+                <div className="timeline-date flex justify-between items-center">
+                  <span>{item.recordDate}</span>
+                  <button onClick={() => deleteTimelineImage(item.id)} style={{background: 'none', border: 'none', color: 'var(--danger-color)', padding: '4px'}}><Icon name="trash-2" size={14}/></button>
+                </div>
+                <div className="timeline-content">
+                  <img src={item.imageUrl} style={{width: '100%', borderRadius: '8px', marginBottom: '8px'}} loading="lazy" />
+                  {item.notes && <p style={{fontSize: '0.875rem'}}>{item.notes}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <h3 className="mt-8 mb-4">評価ログ</h3>
+
           {logs.length === 0 ? <p className="text-secondary">まだ評価がありません。</p> : (
             logs.map(log => (
               <div key={log.id} className="card glass">
@@ -742,6 +838,33 @@ function IndividualDetail({ id, individuals, traitLogs, settings, goBack, update
           </div>
         </form>
       )}
+
+      {viewMode === "timelineForm" && (
+        <form className="glass card" onSubmit={handleTimelineSubmit}>
+          <h2 className="mb-4">成長記録（写真）を追加</h2>
+          <div className="form-group">
+            <label className="form-label">撮影日</label>
+            <input required type="date" className="form-control" value={timelineData.recordDate} onChange={e => setTimelineData({...timelineData, recordDate: e.target.value})} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">写真</label>
+            {timelineData.imageUrl && <img src={timelineData.imageUrl} style={{width: '100%', borderRadius: '12px', marginBottom: '16px'}} />}
+            <label className="btn btn-secondary" style={{cursor: 'pointer'}}>
+              <Icon name="camera" /> {imageLoading ? "処理中..." : (timelineData.imageUrl ? "写真を変更" : "写真を選ぶ")}
+              <input type="file" accept="image/*" style={{display: 'none'}} onChange={handleTimelineImageChange} />
+            </label>
+          </div>
+          <div className="form-group">
+            <label className="form-label">コメント (任意)</label>
+            <textarea className="form-control" rows="2" placeholder="例: 新芽が出てきました" value={timelineData.notes} onChange={e => setTimelineData({...timelineData, notes: e.target.value})}></textarea>
+          </div>
+          <div className="flex gap-4">
+             <button type="button" className="btn btn-secondary" onClick={() => setViewMode("detail")}>キャンセル</button>
+             <button type="submit" className="btn btn-primary" disabled={imageLoading}>保存</button>
+          </div>
+        </form>
+      )}
+
 
       {viewMode === "pedigree" && (
         <div className="glass card">
@@ -1047,14 +1170,16 @@ function App() {
 
   const [individuals, setIndividuals] = useState([]);
   const [traitLogs, setTraitLogs] = useState([]);
+  const [individualImages, setIndividualImages] = useState([]);
   const [settings, setSettings] = useState([]);
 
   const fetchData = async () => {
     setLoading(true);
-    const [indRes, logRes, setRes] = await Promise.all([
+    const [indRes, logRes, setRes, imgRes] = await Promise.all([
       supabaseClient.from('individuals').select('*').order('created_at', { ascending: false }),
       supabaseClient.from('trait_logs').select('*').order('created_at', { ascending: false }),
-      supabaseClient.from('settings').select('*').order('created_at', { ascending: true })
+      supabaseClient.from('settings').select('*').order('created_at', { ascending: true }),
+      supabaseClient.from('individual_images').select('*').order('record_date', { ascending: false })
     ]);
     
     if (indRes.data) {
@@ -1076,6 +1201,9 @@ function App() {
           return;
        }
        setSettings(setRes.data.map(s => ({...s, traitName: s.trait_name, isActive: s.is_active})));
+    }
+    if (imgRes.data) {
+       setIndividualImages(imgRes.data.map(img => ({...img, individualId: img.individual_id, recordDate: img.record_date})));
     }
     setLoading(false);
   };
@@ -1123,6 +1251,25 @@ function App() {
     };
     await supabaseClient.from('trait_logs').insert(dbData);
     await fetchData();
+  };
+
+  const addTimelineImage = async (data) => {
+    const dbData = {
+      individual_id: data.individualId,
+      image_url: data.imageUrl,
+      record_date: data.recordDate,
+      notes: data.notes,
+      user_id: session.user.id
+    };
+    await supabaseClient.from('individual_images').insert(dbData);
+    await fetchData();
+  };
+
+  const deleteTimelineImage = async (id) => {
+    if(window.confirm("この写真を削除してもよろしいですか？")) {
+      await supabaseClient.from('individual_images').delete().eq('id', id);
+      await fetchData();
+    }
   };
 
   if (!session) {
@@ -1174,11 +1321,15 @@ function App() {
              individuals={individuals} 
              traitLogs={traitLogs} 
              settings={settings}
+             individualImages={individualImages}
              updateIndividual={saveIndividual}
              addTraitLog={addTraitLog}
+             addTimelineImage={addTimelineImage}
+             deleteTimelineImage={deleteTimelineImage}
              goBack={() => setCurrentTab("dashboard")} 
            />
         )}
+
       </div>
 
       {/* Bottom Navigation */}
