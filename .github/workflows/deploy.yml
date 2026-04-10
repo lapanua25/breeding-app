@@ -1,0 +1,45 @@
+name: Deploy to Portal
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout breeding-app
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build app
+        run: npm run build
+
+      - name: Checkout terra-nova-botanica
+        uses: actions/checkout@v4
+        with:
+          repository: lapanua25/terra-nova-botanica
+          token: ${{ secrets.GH_PAT }}
+          path: terra-nova-botanica
+
+      - name: Copy dist to breeding-app folder
+        run: |
+          rm -rf terra-nova-botanica/breeding-app/*
+          cp -r dist/* terra-nova-botanica/breeding-app/
+
+      - name: Commit and push to terra-nova-botanica
+        run: |
+          cd terra-nova-botanica
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add breeding-app/
+          git commit -m "Update Botanical Breed app - auto deploy from breeding-app" || echo "No changes to commit"
+          git push origin main
