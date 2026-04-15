@@ -1,10 +1,11 @@
 [build]
-  command = "npm run build"
+  command = "npm ci --force && npm run build"
   publish = "dist"
 
 [build.environment]
   VITE_SUPABASE_URL = "https://blnbyntjpddiyujuewsc.supabase.co"
   VITE_SUPABASE_KEY = "sb_publishable_xY0Paeugw3xB_yrMjhKmLQ_kUVrfZKE"
+  NPM_FLAGS = "--force"
 
 [env.production]
   environment = { VITE_SUPABASE_URL = "https://blnbyntjpddiyujuewsc.supabase.co", VITE_SUPABASE_KEY = "sb_publishable_xY0Paeugw3xB_yrMjhKmLQ_kUVrfZKE" }
