@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { supabase } from './lib/supabase';
+import { supabase, isGuestUser, migrateGuestToAuth } from './lib/supabase';
 import Icon from './components/Icon';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
@@ -10,6 +10,7 @@ import Pricing from './components/Pricing';
 
 function App() {
   const [session, setSession] = useState(null);
+  const [previousSession, setPreviousSession] = useState(null);
   const [currentTab, setCurrentTab] = useState("dashboard"); // dashboard, new, detail, settings
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,21 @@ function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      // ゲストから認証済みユーザーへの自動移行を検出
+      if (_event === 'SIGNED_IN' &&
+          session?.user &&
+          !isGuestUser(session) &&
+          previousSession?.user?.is_anonymous) {
+        try {
+          console.log('ゲスト → 認証済みユーザーへの移行を検出');
+          await migrateGuestToAuth(previousSession.user.id, session.user.id);
+          console.log('マイグレーション完了');
+        } catch (error) {
+          console.error('マイグレーション失敗:', error);
+        }
+      }
+      setPreviousSession(session);
       setSession(session);
     });
     return () => subscription.unsubscribe();
@@ -148,14 +163,14 @@ function App() {
   return (
     <div>
       <div style={{
-        padding: '16px', 
-        background: 'var(--surface-color)', 
-        borderBottom: '1px solid var(--border-color)', 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 50, 
-        display: 'flex', 
-        alignItems: 'center', 
+        padding: '16px',
+        background: 'var(--surface-color)',
+        borderBottom: '1px solid var(--border-color)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
         gap: '8px'
       }}>
@@ -165,15 +180,21 @@ function App() {
              Botanical Breed
            </span>
          </div>
-         <button className="btn btn-secondary" style={{width: 'auto', padding: '6px 12px', fontSize: '0.75rem'}} onClick={() => supabase.auth.signOut()}>
-           ログアウト
-         </button>
+         {session && !isGuestUser(session) ? (
+           <button className="btn btn-secondary" style={{width: 'auto', padding: '6px 12px', fontSize: '0.75rem'}} onClick={() => supabase.auth.signOut()}>
+             ログアウト
+           </button>
+         ) : isGuestUser(session) ? (
+           <button className="btn btn-primary" style={{width: 'auto', padding: '6px 12px', fontSize: '0.75rem'}} onClick={() => setCurrentTab('settings')}>
+             アカウント作成
+           </button>
+         ) : null}
       </div>
 
       {/* Main Content Area */}
       <div style={{minHeight: '100vh', paddingBottom: '90px', animation: 'fadeIn 0.3s ease'}}>
         {currentTab === "dashboard" && <Dashboard individuals={individuals} onSelect={id => { setSelectedId(id); setCurrentTab("detail"); }} onNew={() => setCurrentTab("new")} />}
-        {currentTab === "settings" && <Settings settings={settings} reloadData={fetchData} currentTheme={theme} onChangeTheme={setTheme} existentCategories={Array.from(new Set(individuals.map(i => i.category).filter(Boolean)))} userId={session.user.id} />}
+        {currentTab === "settings" && <Settings settings={settings} reloadData={fetchData} currentTheme={theme} onChangeTheme={setTheme} existentCategories={Array.from(new Set(individuals.map(i => i.category).filter(Boolean)))} userId={session.user.id} session={session} />}
         {currentTab === "new" && (
            <div className="container" style={{paddingTop: '24px'}}>
              <IndividualForm onSave={saveIndividual} onCancel={() => setCurrentTab("dashboard")} individuals={individuals} />
