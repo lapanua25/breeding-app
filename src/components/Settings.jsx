@@ -33,20 +33,33 @@ function Settings({ currentTheme, onChangeTheme, session }) {
       <div className="glass card">
         <h2 className="mb-2">デザインテーマ設定</h2>
         <p className="text-secondary mb-4" style={{fontSize: '0.875rem'}}>お好みのカラーテーマを選択してください。</p>
-        <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+        <div style={{display: 'flex', gap: '12px'}}>
           {[
-            {id: 'emerald', label: 'エメラルド (Dark)'},
-            {id: 'light-leaf', label: 'ボタニカル (Light)'},
-            {id: 'amber', label: 'アンバー (Dark)'},
-            {id: 'ocean', label: 'オーシャン (Dark)'}
+            {id: 'light', label: 'ライト', desc: '白ベース', bg: '#ffffff', fg: '#111827'},
+            {id: 'dark',  label: 'ダーク',  desc: '黒ベース', bg: '#0f172a', fg: '#f1f5f9'},
           ].map(t => (
             <button
               key={t.id}
               onClick={() => onChangeTheme(t.id)}
-              className={`btn ${currentTheme === t.id ? 'btn-primary' : 'btn-secondary'}`}
-              style={{flex: '1 1 calc(50% - 8px)', padding: '12px', fontSize: '0.875rem'}}
+              style={{
+                flex: 1,
+                padding: '20px 12px',
+                borderRadius: '12px',
+                border: currentTheme === t.id ? '2px solid var(--accent-color)' : '2px solid var(--border-color)',
+                background: t.bg,
+                color: t.fg,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                boxShadow: currentTheme === t.id ? '0 0 0 3px rgba(16,185,129,0.2)' : 'none',
+              }}
             >
-              {t.label}
+              <span style={{fontSize: '1.5rem'}}>{t.id === 'light' ? '☀️' : '🌙'}</span>
+              <span style={{fontWeight: 700, fontSize: '0.9375rem'}}>{t.label}</span>
+              <span style={{fontSize: '0.75rem', opacity: 0.6}}>{t.desc}</span>
             </button>
           ))}
         </div>

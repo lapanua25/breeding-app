@@ -6,7 +6,8 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
   const [data, setData] = useState(initialData || { name: "", manageId: "", category: "", breed: "", status: "育成中", sowingDate: "", motherId: "", fatherId: "", memo: "", imageUrl: "" });
   const [imageLoading, setImageLoading] = useState(false);
 
-  const existentCategories = Array.from(new Set(individuals.map(i => i.category).filter(Boolean)));
+  const PRESET_CATEGORIES = ["アガベ", "パキポディウム", "アロエ", "ユーフォルビア", "コーデックス", "メセン", "多肉植物"];
+  const existentCategories = Array.from(new Set([...PRESET_CATEGORIES, ...individuals.map(i => i.category).filter(Boolean)]));
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -59,7 +60,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
 
       <div className="form-group">
         <label className="form-label">種類 (大カテゴリ) *</label>
-        <input required type="text" name="category" list="category-list" className="form-control" placeholder="例: アガベ、塊根植物" value={data.category || ""} onChange={handleChange} />
+        <input required type="text" name="category" list="category-list" className="form-control" placeholder="例: アガベ、パキポディウム、アロエ" value={data.category || ""} onChange={handleChange} />
         <datalist id="category-list">
            {existentCategories.map(c => <option key={c} value={c} />)}
         </datalist>
@@ -84,7 +85,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
         <label className="form-label">ステータス</label>
         <select name="status" className="form-control" value={data.status} onChange={handleChange}>
           <option value="育成中">育成中</option>
-          <option value="売却済">売却済</option>
+          <option value="譲渡or売却済">譲渡or売却済</option>
           <option value="枯死">枯死</option>
         </select>
       </div>

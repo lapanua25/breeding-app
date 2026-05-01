@@ -39,7 +39,13 @@ function App() {
   }, []);
 
   // UI Theme Setting
-  const [theme, setTheme] = useState(() => localStorage.getItem('app_ui_theme') || 'emerald');
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('app_ui_theme');
+    // 旧テーマ名を新テーマ名に移行
+    if (saved === 'emerald' || saved === 'amber' || saved === 'ocean') return 'dark';
+    if (saved === 'light-leaf') return 'light';
+    return saved || 'light';
+  });
   useEffect(() => {
      localStorage.setItem('app_ui_theme', theme);
      document.documentElement.setAttribute('data-theme', theme);
@@ -112,12 +118,15 @@ function App() {
         justifyContent: 'space-between',
         gap: '8px'
       }}>
-         <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-           <Icon name="feather" color="var(--primary-color)" />
-           <span style={{fontWeight: 800, fontSize: '1.125rem'}}>
+         <button
+           onClick={() => setCurrentTab("dashboard")}
+           style={{display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-primary)'}}
+         >
+           <Icon name="cross-breed" color="var(--accent-color)" />
+           <span style={{fontWeight: 800, fontSize: '1.125rem', letterSpacing: '-0.03em'}}>
              Botanical Breed
            </span>
-         </div>
+         </button>
          {session && !isGuestUser(session) ? (
            <button className="btn btn-secondary" style={{width: 'auto', padding: '6px 12px', fontSize: '0.75rem'}} onClick={() => supabase.auth.signOut()}>
              ログアウト

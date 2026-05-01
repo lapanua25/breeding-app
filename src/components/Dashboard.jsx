@@ -28,13 +28,13 @@ function Dashboard({ individuals, onSelect, onNew }) {
       
       {/* Hero / Stats Banner */}
       <div className="glass p-4 card" style={{marginBottom: '24px', background: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(0,0,0,0))', border: '1px solid rgba(16,185,129,0.2)'}}>
-        <h1 className="mb-2" style={{color: 'var(--primary-color)'}}>
-          {individuals.length === 0 ? "ようこそ！🌱" : "マイコレクション"}
+        <h1 className="mb-2" style={{color: 'var(--text-primary)', letterSpacing: '-0.04em'}}>
+          {individuals.length === 0 ? "Botanical Breed" : "Collection"}
         </h1>
         {individuals.length === 0 ? (
           <p className="text-secondary" style={{fontSize: '0.875rem', lineHeight: 1.6}}>
-            まだ植物が登録されていません。<br/>
-            下の「新規登録」ボタンから、お気に入りの植物や交配の親株を追加して、成長の記録を始めましょう！
+            個体がまだ登録されていません。<br/>
+            「新規登録」から親株を追加して交配記録を始めましょう。
           </p>
         ) : (
           <div style={{display: 'flex', gap: '12px'}}>
