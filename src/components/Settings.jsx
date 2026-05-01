@@ -35,31 +35,43 @@ function Settings({ currentTheme, onChangeTheme, session }) {
         <p className="text-secondary mb-4" style={{fontSize: '0.875rem'}}>お好みのカラーテーマを選択してください。</p>
         <div style={{display: 'flex', gap: '12px'}}>
           {[
-            {id: 'light', label: 'ライト', desc: '白ベース', bg: '#ffffff', fg: '#111827'},
-            {id: 'dark',  label: 'ダーク',  desc: '黒ベース', bg: '#0f172a', fg: '#f1f5f9'},
+            {id: 'light', label: 'Ivory White', sub: 'Light', bg: '#ffffff', fg: '#111827', accent: '#059669'},
+            {id: 'dark',  label: 'Onyx Black',  sub: 'Dark',  bg: '#0f172a', fg: '#f1f5f9', accent: '#10b981'},
           ].map(t => (
             <button
               key={t.id}
               onClick={() => onChangeTheme(t.id)}
               style={{
                 flex: 1,
-                padding: '20px 12px',
-                borderRadius: '12px',
-                border: currentTheme === t.id ? '2px solid var(--accent-color)' : '2px solid var(--border-color)',
+                padding: '24px 16px',
+                borderRadius: '14px',
+                border: currentTheme === t.id ? `2px solid ${t.accent}` : '2px solid transparent',
                 background: t.bg,
                 color: t.fg,
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: currentTheme === t.id ? '0 0 0 3px rgba(16,185,129,0.2)' : 'none',
+                alignItems: 'flex-start',
+                gap: '6px',
+                boxShadow: currentTheme === t.id
+                  ? `0 0 0 4px ${t.accent}33, 0 4px 16px rgba(0,0,0,0.15)`
+                  : '0 2px 8px rgba(0,0,0,0.08)',
               }}
             >
-              <span style={{fontSize: '1.5rem'}}>{t.id === 'light' ? '☀️' : '🌙'}</span>
-              <span style={{fontWeight: 700, fontSize: '0.9375rem'}}>{t.label}</span>
-              <span style={{fontSize: '0.75rem', opacity: 0.6}}>{t.desc}</span>
+              <span style={{
+                fontSize: '0.625rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: t.accent,
+              }}>{t.sub}</span>
+              <span style={{fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.02em'}}>{t.label}</span>
+              <div style={{display: 'flex', gap: '4px', marginTop: '4px'}}>
+                {[t.bg === '#ffffff' ? '#f9fafb' : '#1e293b', t.bg === '#ffffff' ? '#e5e7eb' : '#334155', t.accent].map((c, i) => (
+                  <div key={i} style={{width: 12, height: 12, borderRadius: '50%', background: c, border: '1px solid rgba(128,128,128,0.2)'}} />
+                ))}
+              </div>
             </button>
           ))}
         </div>
