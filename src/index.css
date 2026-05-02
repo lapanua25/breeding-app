@@ -107,7 +107,7 @@ h2 { font-size: 1.125rem; }
 
 .btn-primary {
   background-color: var(--primary-color);
-  color: #ffffff;
+  color: var(--background-color);
   box-shadow: var(--shadow-sm);
 }
 .btn-primary:hover {
@@ -115,7 +115,7 @@ h2 { font-size: 1.125rem; }
 }
 
 .btn-secondary {
-  background-color: #ffffff;
+  background-color: var(--surface-color);
   color: var(--text-primary);
   border-color: var(--border-color);
   box-shadow: var(--shadow-sm);
