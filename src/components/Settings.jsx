@@ -30,7 +30,7 @@ function Settings({ currentTheme, onChangeTheme, session }) {
         </div>
       )}
 
-      <div className="glass card">
+      <div className="glass card" style={{padding: '24px'}}>
         <h2 className="mb-2">デザインテーマ設定</h2>
         <p className="text-secondary mb-4" style={{fontSize: '0.875rem'}}>お好みのカラーテーマを選択してください。</p>
         <div style={{display: 'flex', gap: '12px'}}>
