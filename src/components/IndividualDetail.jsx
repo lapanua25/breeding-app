@@ -37,7 +37,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
             {individual.imageUrl && (
               <img src={individual.imageUrl} alt={individual.breed || individual.manageId || ''} style={{width: '100%', borderRadius: '12px', marginBottom: '16px', objectFit: 'cover'}} loading="lazy" />
             )}
-            <h1>{individual.manageId ? `#${individual.manageId}` : '(番号なし)'} <span style={{fontSize: '1rem', fontWeight: 500, color: 'var(--text-secondary)'}}>{individual.breed || ''}</span></h1>
+            <h1>{individual.breed || '(品種未設定)'} <span style={{fontSize: '1rem', fontWeight: 500, color: 'var(--text-secondary)'}}>{individual.manageId ? `#${individual.manageId}` : '管理番号なし'}</span></h1>
             <p className="text-secondary mb-4">
               {individual.category && <span style={{display: 'inline-block', backgroundColor: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.875rem', marginRight: '8px'}}>{individual.category}</span>}
               {individual.breed && <span style={{display: 'inline-block', backgroundColor: 'var(--primary-color)', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.875rem', marginRight: '8px'}}>{individual.breed}</span>}
@@ -139,19 +139,16 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
             {/* Individual name block */}
             <div style={{textAlign: 'center', marginBottom: '20px'}}>
               <div style={{fontSize: '0.6875rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#8a7050', marginBottom: '6px'}}>Individual</div>
-              <div style={{fontSize: '1.625rem', fontWeight: 800, letterSpacing: '0.05em', color: '#c9a84c', fontFamily: 'monospace'}}>{individual.manageId || '—'}</div>
-              {individual.breed && (
-                <div style={{display: 'inline-block', marginTop: '6px', background: 'rgba(201,168,76,0.15)', border: '1px solid #c9a84c', borderRadius: '20px', padding: '2px 12px', fontSize: '0.875rem', color: '#8a5a0a', fontStyle: 'italic'}}>{individual.breed}</div>
-              )}
+              <div style={{fontSize: '1.625rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#2c2214', fontStyle: 'italic'}}>{individual.breed || '(品種未設定)'}</div>
+              <div style={{marginTop: '6px', fontSize: '0.8125rem', color: '#b0986a', fontFamily: 'monospace', letterSpacing: '0.08em'}}>{individual.manageId ? `#${individual.manageId}` : '管理番号なし'}</div>
             </div>
 
             {/* Data rows */}
             <div style={{background: 'rgba(201,168,76,0.06)', borderRadius: '8px', padding: '16px', marginBottom: '20px'}}>
               {[
+                { label: '種類', value: individual.category || '未設定' },
                 { label: '管理番号', value: individual.manageId || '未設定', mono: true },
-                { label: 'カテゴリ', value: individual.category || '未設定' },
                 { label: '播種日', value: individual.sowingDate || '不明' },
-                { label: 'ステータス', value: individual.status || '不明' },
               ].map(row => (
                 <div key={row.label} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid rgba(201,168,76,0.2)'}}>
                   <span style={{fontSize: '0.8125rem', color: '#8a7050', fontWeight: 600, letterSpacing: '0.05em'}}>{row.label}</span>

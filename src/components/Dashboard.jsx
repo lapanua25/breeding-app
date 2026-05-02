@@ -117,7 +117,7 @@ function Dashboard({ individuals, onSelect, onNew }) {
                                )}
                                <div style={{flex: 1}}>
                                    <div style={{display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px'}}>
-                                     <h3 style={{margin: 0, fontSize: '1rem'}}>{i.manageId ? `#${i.manageId}` : '(番号なし)'}</h3>
+                                     <h3 style={{margin: 0, fontSize: '1rem'}}>{i.manageId ? `#${i.manageId}` : '管理番号なし'}</h3>
                                    </div>
                                    <div className="flex justify-between text-secondary" style={{fontSize: '0.8125rem'}}>
                                      <span>{i.status}</span>
