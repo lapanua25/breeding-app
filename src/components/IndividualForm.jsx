@@ -72,11 +72,6 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">個体名 / 愛称 (任意)</label>
-        <input type="text" name="name" className="form-control" placeholder="例: 白鯨、特選株" value={data.name || ""} onChange={handleChange} />
-      </div>
-
-      <div className="form-group">
         <label className="form-label">ユーザー管理番号 (任意)</label>
         <input type="text" name="manageId" className="form-control" placeholder="例: EO-1" value={data.manageId || ""} onChange={handleChange} />
       </div>
@@ -100,7 +95,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
         <select name="motherId" className="form-control" value={data.motherId} onChange={handleChange}>
           <option value="">-- 選択なし --</option>
           {individuals.filter(i => i.id !== data.id).map(i => (
-            <option key={i.id} value={i.id}>{i.name} {i.category ? `[${i.category}]` : ''}</option>
+            <option key={i.id} value={i.id}>{i.manageId ? `#${i.manageId} ` : ''}{i.breed || '(品種未設定)'}{i.category ? ` [${i.category}]` : ''}</option>
           ))}
         </select>
       </div>
@@ -110,7 +105,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
         <select name="fatherId" className="form-control" value={data.fatherId} onChange={handleChange}>
           <option value="">-- 選択なし --</option>
           {individuals.filter(i => i.id !== data.id).map(i => (
-            <option key={i.id} value={i.id}>{i.name} {i.category ? `[${i.category}]` : ''}</option>
+            <option key={i.id} value={i.id}>{i.manageId ? `#${i.manageId} ` : ''}{i.breed || '(品種未設定)'}{i.category ? ` [${i.category}]` : ''}</option>
           ))}
         </select>
       </div>

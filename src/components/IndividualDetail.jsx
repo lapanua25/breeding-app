@@ -18,7 +18,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
     return (
       <div key={nodeId + label} className="tree-node" style={{'--indent': `${depth * 20}px`}}>
         <div className="tree-node-label">{label}</div>
-        <div className="tree-node-value">{nodeData.name}</div>
+        <div className="tree-node-value">{nodeData.manageId ? `#${nodeData.manageId} ` : ''}{nodeData.breed || '(品種未設定)'}</div>
         {nodeData.motherId && renderPedigreeNode(nodeData.motherId, "母親 (♀)", depth + 1)}
         {nodeData.fatherId && renderPedigreeNode(nodeData.fatherId, "父親 (♂)", depth + 1)}
       </div>
@@ -35,9 +35,9 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
         <>
           <div className="card" style={{padding: '24px', marginBottom: '24px'}}>
             {individual.imageUrl && (
-              <img src={individual.imageUrl} alt={individual.name} style={{width: '100%', borderRadius: '12px', marginBottom: '16px', objectFit: 'cover'}} loading="lazy" />
+              <img src={individual.imageUrl} alt={individual.breed || individual.manageId || ''} style={{width: '100%', borderRadius: '12px', marginBottom: '16px', objectFit: 'cover'}} loading="lazy" />
             )}
-            <h1>{individual.name || "(名前なし)"} <span style={{fontSize: '1rem', fontWeight: 500, color: 'var(--text-secondary)'}}>{individual.manageId ? `#${individual.manageId}` : ''}</span></h1>
+            <h1>{individual.manageId ? `#${individual.manageId}` : '(番号なし)'} <span style={{fontSize: '1rem', fontWeight: 500, color: 'var(--text-secondary)'}}>{individual.breed || ''}</span></h1>
             <p className="text-secondary mb-4">
               {individual.category && <span style={{display: 'inline-block', backgroundColor: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.875rem', marginRight: '8px'}}>{individual.category}</span>}
               {individual.breed && <span style={{display: 'inline-block', backgroundColor: 'var(--primary-color)', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.875rem', marginRight: '8px'}}>{individual.breed}</span>}
@@ -45,8 +45,8 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px', fontSize: '0.9375rem'}}>
               <div><strong>ステータス:</strong> {individual.status}</div>
               <div><strong>播種日:</strong> {individual.sowingDate || "未設定"}</div>
-              <div><strong>母親 (♀):</strong> {mother ? mother.name : "未設定"}</div>
-              <div><strong>父親 (♂):</strong> {father ? father.name : "未設定"}</div>
+              <div><strong>母親 (♀):</strong> {mother ? `${mother.manageId ? `#${mother.manageId} ` : ''}${mother.breed || '(品種未設定)'}` : "未設定"}</div>
+              <div><strong>父親 (♂):</strong> {father ? `${father.manageId ? `#${father.manageId} ` : ''}${father.breed || '(品種未設定)'}` : "未設定"}</div>
             </div>
             {individual.memo && <p className="mb-2"><strong>メモ:</strong><br/>{individual.memo}</p>}
           </div>
@@ -66,7 +66,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
           <div className="tree">
             <div className="tree-node">
               <div className="tree-node-label">対象個体</div>
-              <div className="tree-node-value">{individual.name}</div>
+              <div className="tree-node-value">{individual.manageId ? `#${individual.manageId} ` : ''}{individual.breed || '(品種未設定)'}</div>
               {individual.motherId && renderPedigreeNode(individual.motherId, "母親 (♀)", 1)}
               {individual.fatherId && renderPedigreeNode(individual.fatherId, "父親 (♂)", 1)}
             </div>
@@ -139,9 +139,9 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
             {/* Individual name block */}
             <div style={{textAlign: 'center', marginBottom: '20px'}}>
               <div style={{fontSize: '0.6875rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#8a7050', marginBottom: '6px'}}>Individual</div>
-              <div style={{fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.01em', color: '#2c2214'}}>{individual.name || "(名前なし)"}</div>
+              <div style={{fontSize: '1.625rem', fontWeight: 800, letterSpacing: '0.05em', color: '#c9a84c', fontFamily: 'monospace'}}>{individual.manageId || '—'}</div>
               {individual.breed && (
-                <div style={{display: 'inline-block', marginTop: '6px', background: 'rgba(201,168,76,0.15)', border: '1px solid #c9a84c', borderRadius: '20px', padding: '2px 12px', fontSize: '0.8125rem', color: '#8a5a0a', fontStyle: 'italic'}}>{individual.breed}</div>
+                <div style={{display: 'inline-block', marginTop: '6px', background: 'rgba(201,168,76,0.15)', border: '1px solid #c9a84c', borderRadius: '20px', padding: '2px 12px', fontSize: '0.875rem', color: '#8a5a0a', fontStyle: 'italic'}}>{individual.breed}</div>
               )}
             </div>
 
@@ -171,7 +171,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
                   ) : (
                     <div style={{width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(201,168,76,0.1)', border: '2px solid #c9a84c', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 6px', color: '#c9a84c'}}><Icon name="image" size={20}/></div>
                   )}
-                  <div style={{fontSize: '0.8125rem', fontWeight: 700, color: '#2c2214'}}>{mother ? mother.name : '未設定'}</div>
+                  <div style={{fontSize: '0.8125rem', fontWeight: 700, color: '#2c2214'}}>{mother ? (mother.manageId ? `#${mother.manageId}` : mother.breed || '未設定') : '未設定'}</div>
                   <div style={{fontSize: '0.6875rem', color: '#c0392b', letterSpacing: '0.05em'}}>♀ 母親</div>
                 </div>
                 {/* × mark */}
@@ -183,7 +183,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
                   ) : (
                     <div style={{width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(201,168,76,0.1)', border: '2px solid #c9a84c', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 6px', color: '#c9a84c'}}><Icon name="image" size={20}/></div>
                   )}
-                  <div style={{fontSize: '0.8125rem', fontWeight: 700, color: '#2c2214'}}>{father ? father.name : '未設定'}</div>
+                  <div style={{fontSize: '0.8125rem', fontWeight: 700, color: '#2c2214'}}>{father ? (father.manageId ? `#${father.manageId}` : father.breed || '未設定') : '未設定'}</div>
                   <div style={{fontSize: '0.6875rem', color: '#2980b9', letterSpacing: '0.05em'}}>♂ 父親</div>
                 </div>
               </div>

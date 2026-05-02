@@ -8,7 +8,7 @@ function Dashboard({ individuals, onSelect, onNew }) {
   const categories = useMemo(() => Array.from(new Set(individuals.map(i => i.category).filter(Boolean))), [individuals]);
 
   const filtered = individuals.filter(i => {
-    const matchSearch = i.name.toLowerCase().includes(search.toLowerCase()) || i.id.includes(search);
+    const matchSearch = (i.manageId || '').toLowerCase().includes(search.toLowerCase()) || (i.breed || '').toLowerCase().includes(search.toLowerCase()) || (i.category || '').toLowerCase().includes(search.toLowerCase()) || i.id.includes(search);
     const matchCategory = selectedCategory ? i.category === selectedCategory : true;
     return matchSearch && matchCategory;
   });
@@ -63,7 +63,7 @@ function Dashboard({ individuals, onSelect, onNew }) {
             <input 
               type="text" 
               className="form-control" 
-              placeholder="品種名や個体名で検索..." 
+              placeholder="品種名や管理番号で検索..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               autoFocus
@@ -117,8 +117,7 @@ function Dashboard({ individuals, onSelect, onNew }) {
                                )}
                                <div style={{flex: 1}}>
                                    <div style={{display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px'}}>
-                                     <h3 style={{margin: 0, fontSize: '1rem'}}>{i.name || "(名前なし)"}</h3>
-                                     <span style={{fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500}}>{i.manageId ? `#${i.manageId}` : ''}</span>
+                                     <h3 style={{margin: 0, fontSize: '1rem'}}>{i.manageId ? `#${i.manageId}` : '(番号なし)'}</h3>
                                    </div>
                                    <div className="flex justify-between text-secondary" style={{fontSize: '0.8125rem'}}>
                                      <span>{i.status}</span>
