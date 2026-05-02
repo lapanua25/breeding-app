@@ -21,7 +21,9 @@ jobs:
         run: npm install --verbose
 
       - name: Build app
-        run: npm run build
+        run: |
+          chmod +x node_modules/.bin/vite
+          npm run build
 
       - name: Clone terra-nova-botanica with verbose output
         run: |

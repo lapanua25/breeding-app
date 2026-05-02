@@ -21,7 +21,9 @@ jobs:
         run: npm install
 
       - name: Build application
-        run: npm run build
+        run: |
+          chmod +x node_modules/.bin/vite
+          npm run build
         env:
           VITE_SUPABASE_URL: https://blnbyntjpddiyujuewsc.supabase.co
           VITE_SUPABASE_KEY: sb_publishable_xY0Paeugw3xB_yrMjhKmLQ_kUVrfZKE
