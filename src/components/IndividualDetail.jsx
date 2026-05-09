@@ -18,7 +18,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
     return (
       <div key={nodeId + label} className="tree-node" style={{'--indent': `${depth * 20}px`}}>
         <div className="tree-node-label">{label}</div>
-        <div className="tree-node-value">{nodeData.manageId ? `#${nodeData.manageId} ` : ''}{nodeData.breed || '(品種未設定)'}</div>
+        <div className="tree-node-value">{nodeData.sex ? `${nodeData.sex} ` : ''}{nodeData.manageId ? `#${nodeData.manageId} ` : ''}{nodeData.breed || '(品種未設定)'}</div>
         {nodeData.motherId && renderPedigreeNode(nodeData.motherId, "母親 (♀)", depth + 1)}
         {nodeData.fatherId && renderPedigreeNode(nodeData.fatherId, "父親 (♂)", depth + 1)}
       </div>
@@ -43,6 +43,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
               {individual.breed && <span style={{display: 'inline-block', backgroundColor: 'var(--primary-color)', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.875rem', marginRight: '8px'}}>{individual.breed}</span>}
             </p>
             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px', fontSize: '0.9375rem'}}>
+              <div><strong>性別:</strong> {individual.sex || "不明"}</div>
               <div><strong>ステータス:</strong> {individual.status}</div>
               <div><strong>播種日:</strong> {individual.sowingDate || "未設定"}</div>
               <div><strong>母親 (♀):</strong> {mother ? `${mother.manageId ? `#${mother.manageId} ` : ''}${mother.breed || '(品種未設定)'}` : "未設定"}</div>
@@ -66,7 +67,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
           <div className="tree">
             <div className="tree-node">
               <div className="tree-node-label">対象個体</div>
-              <div className="tree-node-value">{individual.manageId ? `#${individual.manageId} ` : ''}{individual.breed || '(品種未設定)'}</div>
+              <div className="tree-node-value">{individual.sex ? `${individual.sex} ` : ''}{individual.manageId ? `#${individual.manageId} ` : ''}{individual.breed || '(品種未設定)'}</div>
               {individual.motherId && renderPedigreeNode(individual.motherId, "母親 (♀)", 1)}
               {individual.fatherId && renderPedigreeNode(individual.fatherId, "父親 (♂)", 1)}
             </div>
@@ -147,6 +148,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
             <div style={{background: 'rgba(201,168,76,0.06)', borderRadius: '8px', padding: '16px', marginBottom: '20px'}}>
               {[
                 { label: '種類', value: individual.category || '未設定' },
+                { label: '性別', value: individual.sex || '不明' },
                 { label: '管理番号', value: individual.manageId || '未設定', mono: true },
                 { label: '播種日', value: individual.sowingDate || '不明' },
               ].map(row => (

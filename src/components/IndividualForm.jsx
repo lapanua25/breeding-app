@@ -3,7 +3,7 @@ import { supabase, compressImage, dataURLtoBlob } from '../lib/supabase';
 import Icon from './Icon';
 
 function IndividualForm({ onSave, onCancel, initialData, individuals }) {
-  const [data, setData] = useState(initialData || { name: "", manageId: "", category: "", breed: "", status: "育成中", sowingDate: "", motherId: "", fatherId: "", memo: "", imageUrl: "" });
+  const [data, setData] = useState(initialData || { name: "", manageId: "", category: "", breed: "", sex: "", status: "育成中", sowingDate: "", motherId: "", fatherId: "", memo: "", imageUrl: "" });
   const [imageLoading, setImageLoading] = useState(false);
 
   const PRESET_CATEGORIES = ["アガベ", "パキポディウム", "アロエ", "ユーフォルビア", "コーデックス", "メセン", "多肉植物"];
@@ -72,6 +72,25 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
       </div>
 
       <div className="form-group">
+        <label className="form-label">性別</label>
+        <div style={{display: 'flex', gap: '8px'}}>
+          {[{val: '♀', label: '♀ 雌'}, {val: '♂', label: '♂ 雄'}, {val: '', label: '不明'}].map(opt => (
+            <button
+              type="button"
+              key={opt.label}
+              onClick={() => setData({...data, sex: opt.val})}
+              style={{
+                flex: 1, padding: '12px 8px', borderRadius: '10px', cursor: 'pointer', fontSize: '0.9375rem', fontWeight: data.sex === opt.val ? 700 : 400, transition: 'all 0.15s',
+                border: `1.5px solid ${data.sex === opt.val ? 'var(--accent-color)' : 'var(--border-color)'}`,
+                background: data.sex === opt.val ? 'rgba(5,150,105,0.08)' : 'transparent',
+                color: data.sex === opt.val ? 'var(--accent-color)' : 'var(--text-secondary)',
+              }}
+            >{opt.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="form-group">
         <label className="form-label">ユーザー管理番号 (任意)</label>
         <input type="text" name="manageId" className="form-control" placeholder="例: EO-1" value={data.manageId || ""} onChange={handleChange} />
       </div>
@@ -87,7 +106,15 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
 
       <div className="form-group">
         <label className="form-label">播種日</label>
-        <input type="date" name="sowingDate" className="form-control" value={data.sowingDate} onChange={handleChange} />
+        <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+          <input type="date" name="sowingDate" className="form-control" value={data.sowingDate || ''} onChange={handleChange} style={{flex: 1}} />
+          {data.sowingDate && (
+            <button type="button" onClick={() => setData({...data, sowingDate: ''})}
+              style={{padding: '14px 14px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', whiteSpace: 'nowrap', fontSize: '0.875rem', flexShrink: 0}}>
+              クリア
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="form-group">

@@ -116,8 +116,9 @@ function Dashboard({ individuals, onSelect, onNew }) {
                                  </div>
                                )}
                                <div style={{flex: 1}}>
-                                   <div style={{display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px'}}>
+                                   <div style={{display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px'}}>
                                      <h3 style={{margin: 0, fontSize: '1rem'}}>{i.manageId ? `#${i.manageId}` : '管理番号なし'}</h3>
+                                     {i.sex && <span style={{fontSize: '0.75rem', padding: '1px 7px', borderRadius: '20px', background: i.sex === '♀' ? 'rgba(255,77,79,0.1)' : i.sex === '♂' ? 'rgba(24,144,255,0.1)' : 'rgba(0,0,0,0.05)', color: i.sex === '♀' ? '#c0392b' : i.sex === '♂' ? '#2980b9' : 'var(--text-secondary)', fontWeight: 600}}>{i.sex}</span>}
                                    </div>
                                    <div className="flex justify-between text-secondary" style={{fontSize: '0.8125rem'}}>
                                      <span>{i.status}</span>
