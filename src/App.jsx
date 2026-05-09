@@ -76,6 +76,7 @@ function App() {
       manage_id: data.manageId || null,
       category: data.category,
       breed: data.breed || null,
+      sex: data.sex || null,
       status: data.status,
       sowing_date: data.sowingDate || null,
       mother_id: data.motherId || null,
@@ -93,6 +94,12 @@ function App() {
        await fetchData();
        setCurrentTab("dashboard");
     }
+  };
+
+  const deleteIndividual = async (id) => {
+    await supabase.from('individuals').delete().eq('id', id);
+    setCurrentTab("dashboard");
+    await fetchData();
   };
 
   if (!session) {
@@ -152,7 +159,9 @@ function App() {
              id={selectedId}
              individuals={individuals}
              updateIndividual={saveIndividual}
+             deleteIndividual={deleteIndividual}
              goBack={() => setCurrentTab("dashboard")}
+             onSelect={id => setSelectedId(id)}
            />
         )}
 

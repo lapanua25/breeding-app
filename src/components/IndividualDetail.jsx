@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import Icon from './Icon';
 import IndividualForm from './IndividualForm';
 
-function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
+function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteIndividual, onSelect }) {
   const [viewMode, setViewMode] = useState("detail"); // detail, editForm, pedigree, certificate
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const individual = individuals.find(i => i.id === id);
+  const offspring = individuals.filter(i => i.motherId === id || i.fatherId === id);
 
   if (!individual) return <div>見つかりません</div>;
 
@@ -57,6 +59,55 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual }) {
             <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("pedigree")}><Icon name="git-merge" size={18}/> 家系図</button>
             <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("certificate")}><Icon name="award" size={18}/> 証明書</button>
           </div>
+
+          {/* 子株一覧 */}
+          {offspring.length > 0 && (
+            <div className="card" style={{padding: '20px', marginBottom: '24px'}}>
+              <h2 className="mb-4" style={{fontSize: '1rem'}}>子株一覧 <span style={{color: 'var(--text-secondary)', fontWeight: 400}}>({offspring.length}株)</span></h2>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                {offspring.map(child => (
+                  <div key={child.id} onClick={() => onSelect(child.id)}
+                    style={{display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', borderRadius: '10px', border: '1px solid var(--border-color)', cursor: 'pointer', background: 'var(--surface-hover)', transition: 'background 0.15s'}}>
+                    {child.imageUrl ? (
+                      <img src={child.imageUrl} style={{width: '44px', height: '44px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0}} loading="lazy" />
+                    ) : (
+                      <div style={{width: '44px', height: '44px', borderRadius: '8px', background: 'var(--background-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
+                        <Icon name="image" size={20} color="var(--text-secondary)" />
+                      </div>
+                    )}
+                    <div style={{flex: 1, minWidth: 0}}>
+                      <div style={{fontWeight: 700, fontSize: '0.9375rem'}}>{child.breed || '(品種未設定)'}{child.manageId ? <span style={{fontWeight: 400, color: 'var(--text-secondary)', fontSize: '0.8125rem', marginLeft: '6px'}}>#{child.manageId}</span> : ''}</div>
+                      <div style={{fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', gap: '8px'}}>
+                        {child.sex && <span>{child.sex}</span>}
+                        <span>{child.status}</span>
+                        {child.sowingDate && <span>{child.sowingDate}</span>}
+                      </div>
+                    </div>
+                    <Icon name="chevron-down" size={16} color="var(--text-secondary)" style={{transform: 'rotate(-90deg)', flexShrink: 0}} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 削除 */}
+          {confirmDelete ? (
+            <div className="card" style={{padding: '16px', marginBottom: '24px', borderColor: 'var(--danger-color)', background: 'rgba(239,68,68,0.04)'}}>
+              <p style={{marginBottom: '12px', fontWeight: 600, color: 'var(--danger-color)'}}>本当に削除しますか？この操作は取り消せません。</p>
+              <div style={{display: 'flex', gap: '8px'}}>
+                <button className="btn" style={{flex: 1, background: 'var(--danger-color)', color: '#fff', border: 'none'}} onClick={() => deleteIndividual(id)}>
+                  <Icon name="trash-2" size={16}/> 削除する
+                </button>
+                <button className="btn btn-secondary" style={{flex: 1}} onClick={() => setConfirmDelete(false)}>キャンセル</button>
+              </div>
+            </div>
+          ) : (
+            <div style={{marginBottom: '24px', textAlign: 'right'}}>
+              <button onClick={() => setConfirmDelete(true)} style={{background: 'none', border: 'none', color: 'var(--danger-color)', cursor: 'pointer', fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '4px', opacity: 0.7}}>
+                <Icon name="trash-2" size={14}/> この個体を削除
+              </button>
+            </div>
+          )}
         </>
       )}
 

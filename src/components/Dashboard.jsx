@@ -1,17 +1,35 @@
 import React, { useState, useMemo } from 'react';
 import Icon from './Icon';
 
+const SORT_OPTIONS = [
+  { val: 'newest',     label: '新着順' },
+  { val: 'oldest',     label: '登録順' },
+  { val: 'sowingDesc', label: '播種日↓' },
+  { val: 'sowingAsc',  label: '播種日↑' },
+  { val: 'breed',      label: '品種順' },
+];
+
 function Dashboard({ individuals, onSelect, onNew }) {
   const [search, setSearch] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const categories = useMemo(() => Array.from(new Set(individuals.map(i => i.category).filter(Boolean))), [individuals]);
 
-  const filtered = individuals.filter(i => {
-    const matchSearch = (i.manageId || '').toLowerCase().includes(search.toLowerCase()) || (i.breed || '').toLowerCase().includes(search.toLowerCase()) || (i.category || '').toLowerCase().includes(search.toLowerCase()) || i.id.includes(search);
-    const matchCategory = selectedCategory ? i.category === selectedCategory : true;
-    return matchSearch && matchCategory;
-  });
+  const filtered = useMemo(() => {
+    const f = individuals.filter(i => {
+      const matchSearch = (i.manageId || '').toLowerCase().includes(search.toLowerCase()) || (i.breed || '').toLowerCase().includes(search.toLowerCase()) || (i.category || '').toLowerCase().includes(search.toLowerCase()) || i.id.includes(search);
+      const matchCategory = selectedCategory ? i.category === selectedCategory : true;
+      return matchSearch && matchCategory;
+    });
+    return [...f].sort((a, b) => {
+      if (sortBy === 'oldest')     return new Date(a.created_at) - new Date(b.created_at);
+      if (sortBy === 'sowingDesc') return (b.sowingDate || '').localeCompare(a.sowingDate || '');
+      if (sortBy === 'sowingAsc')  return (a.sowingDate || '').localeCompare(b.sowingDate || '');
+      if (sortBy === 'breed')      return (a.breed || '').localeCompare(b.breed || '', 'ja');
+      return new Date(b.created_at) - new Date(a.created_at); // newest
+    });
+  }, [individuals, search, selectedCategory, sortBy]);
 
   const grouped = useMemo(() => {
     const groups = {};
@@ -60,9 +78,9 @@ function Dashboard({ individuals, onSelect, onNew }) {
 
         {isSearchOpen && (
           <div className="form-group mb-4" style={{animation: 'fadeIn 0.3s ease', margin: '0 -8px'}}>
-            <input 
-              type="text" 
-              className="form-control" 
+            <input
+              type="text"
+              className="form-control"
               placeholder="品種名や管理番号で検索..."
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -70,6 +88,16 @@ function Dashboard({ individuals, onSelect, onNew }) {
             />
           </div>
         )}
+
+        {/* 並び替え */}
+        <div style={{display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', marginBottom: categories.length > 0 ? '12px' : '0'}}>
+          {SORT_OPTIONS.map(opt => (
+            <button key={opt.val} onClick={() => setSortBy(opt.val)}
+              style={{flexShrink: 0, padding: '5px 12px', borderRadius: '20px', border: `1px solid ${sortBy === opt.val ? 'var(--accent-color)' : 'var(--border-color)'}`, background: sortBy === opt.val ? 'rgba(5,150,105,0.08)' : 'transparent', color: sortBy === opt.val ? 'var(--accent-color)' : 'var(--text-secondary)', fontSize: '0.8125rem', fontWeight: sortBy === opt.val ? 700 : 400, cursor: 'pointer', whiteSpace: 'nowrap'}}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
         {categories.length > 0 && (
           <div className="flex gap-2" style={{overflowX: 'auto', paddingBottom: '8px', margin: '0 -8px', padding: '0 8px'}}>
@@ -116,10 +144,11 @@ function Dashboard({ individuals, onSelect, onNew }) {
                                  </div>
                                )}
                                <div style={{flex: 1}}>
-                                   <div style={{display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px'}}>
-                                     <h3 style={{margin: 0, fontSize: '1rem'}}>{i.manageId ? `#${i.manageId}` : '管理番号なし'}</h3>
+                                   <div style={{display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', flexWrap: 'wrap'}}>
+                                     <h3 style={{margin: 0, fontSize: '1rem'}}>{i.breed || '(品種未設定)'}</h3>
                                      {i.sex && <span style={{fontSize: '0.75rem', padding: '1px 7px', borderRadius: '20px', background: i.sex === '♀' ? 'rgba(255,77,79,0.1)' : i.sex === '♂' ? 'rgba(24,144,255,0.1)' : 'rgba(0,0,0,0.05)', color: i.sex === '♀' ? '#c0392b' : i.sex === '♂' ? '#2980b9' : 'var(--text-secondary)', fontWeight: 600}}>{i.sex}</span>}
                                    </div>
+                                   {i.manageId && <div style={{fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '2px', fontFamily: 'monospace'}}>#{i.manageId}</div>}
                                    <div className="flex justify-between text-secondary" style={{fontSize: '0.8125rem'}}>
                                      <span>{i.status}</span>
                                      <span>{i.sowingDate}</span>

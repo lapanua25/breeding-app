@@ -121,20 +121,22 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
         <label className="form-label">母親（♀）</label>
         <select name="motherId" className="form-control" value={data.motherId} onChange={handleChange}>
           <option value="">-- 選択なし --</option>
-          {individuals.filter(i => i.id !== data.id).map(i => (
+          {individuals.filter(i => i.id !== data.id && (i.sex === '♀' || !i.sex)).map(i => (
             <option key={i.id} value={i.id}>{i.manageId ? `#${i.manageId} ` : ''}{i.breed || '(品種未設定)'}{i.category ? ` [${i.category}]` : ''}</option>
           ))}
         </select>
+        <p style={{fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px'}}>性別が「♀ 雌」または「不明」の個体のみ表示</p>
       </div>
 
       <div className="form-group">
         <label className="form-label">父親（♂）</label>
         <select name="fatherId" className="form-control" value={data.fatherId} onChange={handleChange}>
           <option value="">-- 選択なし --</option>
-          {individuals.filter(i => i.id !== data.id).map(i => (
+          {individuals.filter(i => i.id !== data.id && (i.sex === '♂' || !i.sex)).map(i => (
             <option key={i.id} value={i.id}>{i.manageId ? `#${i.manageId} ` : ''}{i.breed || '(品種未設定)'}{i.category ? ` [${i.category}]` : ''}</option>
           ))}
         </select>
+        <p style={{fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px'}}>性別が「♂ 雄」または「不明」の個体のみ表示</p>
       </div>
 
       <div className="form-group">
