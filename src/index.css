@@ -262,6 +262,14 @@ select.form-control {
   padding: 12px;
 }
 
+/* Fix vertical alignment of ♂/♀ Unicode symbols */
+:is(button, span, div) > .sex-symbol,
+.sex-symbol {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+}
+
 /* Animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }

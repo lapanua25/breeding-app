@@ -81,6 +81,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
               onClick={() => setData({...data, sex: opt.val})}
               style={{
                 flex: 1, padding: '12px 8px', borderRadius: '10px', cursor: 'pointer', fontSize: '0.9375rem', fontWeight: data.sex === opt.val ? 700 : 400, transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', lineHeight: 1,
                 border: `1.5px solid ${data.sex === opt.val ? 'var(--accent-color)' : 'var(--border-color)'}`,
                 background: data.sex === opt.val ? 'rgba(5,150,105,0.08)' : 'transparent',
                 color: data.sex === opt.val ? 'var(--accent-color)' : 'var(--text-secondary)',
