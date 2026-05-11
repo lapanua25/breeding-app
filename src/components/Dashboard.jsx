@@ -146,7 +146,7 @@ function Dashboard({ individuals, onSelect, onNew }) {
                                <div style={{flex: 1}}>
                                    <div style={{display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', flexWrap: 'wrap'}}>
                                      <h3 style={{margin: 0, fontSize: '1rem'}}>{i.breed || '(品種未設定)'}</h3>
-                                     {i.sex && <span style={{fontSize: '0.75rem', padding: '1px 7px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', lineHeight: 1, background: i.sex === '雌' ? 'rgba(255,77,79,0.1)' : i.sex === '雄' ? 'rgba(24,144,255,0.1)' : 'rgba(0,0,0,0.05)', color: i.sex === '雌' ? '#c0392b' : i.sex === '雄' ? '#2980b9' : 'var(--text-secondary)', fontWeight: 600}}>{i.sex}</span>}
+                                     {i.sex && <span style={{fontSize: '0.75rem', padding: '1px 7px', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', lineHeight: 1, background: i.sex === '♀' ? 'rgba(255,77,79,0.1)' : i.sex === '♂' ? 'rgba(24,144,255,0.1)' : 'rgba(0,0,0,0.05)', color: i.sex === '♀' ? '#c0392b' : i.sex === '♂' ? '#2980b9' : 'var(--text-secondary)', fontWeight: 600}}>{i.sex + '\uFE0E'}</span>}
                                    </div>
                                    {i.manageId && <div style={{fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '2px', fontFamily: 'monospace'}}>#{i.manageId}</div>}
                                    <div className="flex justify-between text-secondary" style={{fontSize: '0.8125rem'}}>

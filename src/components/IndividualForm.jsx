@@ -74,7 +74,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
       <div className="form-group">
         <label className="form-label">性別</label>
         <div style={{display: 'flex', gap: '8px'}}>
-          {[{val: '雌', label: '雌'}, {val: '雄', label: '雄'}, {val: '', label: '不明'}].map(opt => (
+          {[{val: '♀', label: '♀\uFE0E'}, {val: '♂', label: '♂\uFE0E'}, {val: '', label: '不明'}].map(opt => (
             <button
               type="button"
               key={opt.label}
