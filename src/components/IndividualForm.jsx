@@ -74,7 +74,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
       <div className="form-group">
         <label className="form-label">性別</label>
         <div style={{display: 'flex', gap: '8px'}}>
-          {[{val: '♀', label: '♀ 雌'}, {val: '♂', label: '♂ 雄'}, {val: '', label: '不明'}].map(opt => (
+          {[{val: '雌', label: '雌'}, {val: '雄', label: '雄'}, {val: '', label: '不明'}].map(opt => (
             <button
               type="button"
               key={opt.label}
@@ -119,7 +119,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">母親（♀）</label>
+        <label className="form-label">母親</label>
         <select name="motherId" className="form-control" value={data.motherId} onChange={handleChange}>
           <option value="">-- 選択なし --</option>
           {individuals.filter(i => i.id !== data.id && (i.sex === '♀' || !i.sex)).map(i => (
@@ -130,7 +130,7 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
       </div>
 
       <div className="form-group">
-        <label className="form-label">父親（♂）</label>
+        <label className="form-label">父親</label>
         <select name="fatherId" className="form-control" value={data.fatherId} onChange={handleChange}>
           <option value="">-- 選択なし --</option>
           {individuals.filter(i => i.id !== data.id && (i.sex === '♂' || !i.sex)).map(i => (
