@@ -52,6 +52,7 @@ function App() {
   }, [theme]);
 
   const [individuals, setIndividuals] = useState([]);
+  const [duplicateData, setDuplicateData] = useState(null);
 
   const fetchData = async () => {
     if (!session?.user?.id) return;
@@ -151,7 +152,12 @@ function App() {
         {currentTab === "settings" && <Settings currentTheme={theme} onChangeTheme={setTheme} session={session} />}
         {currentTab === "new" && (
            <div className="container" style={{paddingTop: '24px'}}>
-             <IndividualForm onSave={saveIndividual} onCancel={() => setCurrentTab("dashboard")} individuals={individuals} />
+             <IndividualForm
+               initialData={duplicateData}
+               onSave={async (data) => { await saveIndividual(data); setDuplicateData(null); }}
+               onCancel={() => { setCurrentTab("dashboard"); setDuplicateData(null); }}
+               individuals={individuals}
+             />
            </div>
         )}
         {currentTab === "detail" && selectedId && (
@@ -162,6 +168,11 @@ function App() {
              deleteIndividual={deleteIndividual}
              goBack={() => setCurrentTab("dashboard")}
              onSelect={id => setSelectedId(id)}
+             onDuplicate={(data) => {
+               const { id: _, created_at, ...rest } = data;
+               setDuplicateData({ ...rest, manageId: '' });
+               setCurrentTab("new");
+             }}
            />
         )}
 

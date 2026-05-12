@@ -5,6 +5,7 @@ import Icon from './Icon';
 function IndividualForm({ onSave, onCancel, initialData, individuals }) {
   const [data, setData] = useState(initialData || { name: "", manageId: "", category: "", breed: "", sex: "", status: "育成中", sowingDate: "", motherId: "", fatherId: "", memo: "", imageUrl: "" });
   const [imageLoading, setImageLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const PRESET_CATEGORIES = ["アガベ", "パキポディウム", "アロエ", "ユーフォルビア", "コーデックス", "メセン", "多肉植物"];
   const existentCategories = Array.from(new Set([...PRESET_CATEGORIES, ...individuals.map(i => i.category).filter(Boolean)]));
@@ -35,9 +36,11 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(data);
+    setIsSaving(true);
+    await onSave(data);
+    setIsSaving(false);
   };
 
   return (
@@ -146,8 +149,10 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
       </div>
 
       <div className="flex gap-4">
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>キャンセル</button>
-        <button type="submit" className="btn btn-primary">保存</button>
+        <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={isSaving}>キャンセル</button>
+        <button type="submit" className="btn btn-primary" disabled={isSaving} style={{opacity: isSaving ? 0.7 : 1}}>
+          {isSaving ? '保存中...' : '保存'}
+        </button>
       </div>
     </form>
   );

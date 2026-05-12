@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import Icon from './Icon';
 import IndividualForm from './IndividualForm';
 
-function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteIndividual, onSelect }) {
-  const [viewMode, setViewMode] = useState("detail"); // detail, editForm, pedigree, certificate
+function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteIndividual, onSelect, onDuplicate }) {
+  const [viewMode, setViewMode] = useState("detail");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [modalImage, setModalImage] = useState(null);
+
   const individual = individuals.find(i => i.id === id);
   const offspring = individuals.filter(i => i.motherId === id || i.fatherId === id);
 
@@ -29,6 +32,14 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
 
   return (
     <div className="container">
+      {/* 写真拡大モーダル */}
+      {modalImage && (
+        <div onClick={() => setModalImage(null)} style={{position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'}}>
+          <img src={modalImage} style={{maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px'}} />
+          <div style={{position: 'absolute', top: '20px', right: '20px', color: '#fff', fontSize: '1.5rem', cursor: 'pointer', lineHeight: 1}}>✕</div>
+        </div>
+      )}
+
       {viewMode === "detail" && (
         <button className="btn btn-secondary mb-4" onClick={goBack} style={{width: 'auto', padding: '8px 16px'}}><Icon name="arrow-left" size={16}/> 戻る</button>
       )}
@@ -37,7 +48,13 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
         <>
           <div className="card" style={{padding: '24px', marginBottom: '24px'}}>
             {individual.imageUrl && (
-              <img src={individual.imageUrl} alt={individual.breed || individual.manageId || ''} style={{width: '100%', borderRadius: '12px', marginBottom: '16px', objectFit: 'cover'}} loading="lazy" />
+              <img
+                src={individual.imageUrl}
+                alt={individual.breed || individual.manageId || ''}
+                onClick={() => setModalImage(individual.imageUrl)}
+                style={{width: '100%', borderRadius: '12px', marginBottom: '16px', objectFit: 'cover', cursor: 'zoom-in'}}
+                loading="lazy"
+              />
             )}
             <h1>{individual.breed || '(品種未設定)'} <span style={{fontSize: '1rem', fontWeight: 500, color: 'var(--text-secondary)'}}>{individual.manageId ? `#${individual.manageId}` : '管理番号なし'}</span></h1>
             <p className="text-secondary mb-4">
@@ -51,13 +68,18 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
               <div><strong>母親:</strong> {mother ? `${mother.manageId ? `#${mother.manageId} ` : ''}${mother.breed || '(品種未設定)'}` : "未設定"}</div>
               <div><strong>父親:</strong> {father ? `${father.manageId ? `#${father.manageId} ` : ''}${father.breed || '(品種未設定)'}` : "未設定"}</div>
             </div>
-            {individual.memo && <p className="mb-2"><strong>メモ:</strong><br/>{individual.memo}</p>}
+            {individual.memo && (
+              <p className="mb-2"><strong>メモ:</strong><br/>
+                <span style={{whiteSpace: 'pre-wrap'}}>{individual.memo}</span>
+              </p>
+            )}
           </div>
 
           <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '24px'}}>
             <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("editForm")}><Icon name="edit-2" size={18}/> 編集</button>
             <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("pedigree")}><Icon name="git-merge" size={18}/> 家系図</button>
             <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => setViewMode("certificate")}><Icon name="award" size={18}/> 証明書</button>
+            <button className="btn btn-secondary" style={{flex: '1 1 auto', padding: '12px 8px', fontSize: '1rem'}} onClick={() => onDuplicate(individual)}><Icon name="feather" size={18}/> 複製</button>
           </div>
 
           {/* 子株一覧 */}
@@ -78,7 +100,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
                     <div style={{flex: 1, minWidth: 0}}>
                       <div style={{fontWeight: 700, fontSize: '0.9375rem'}}>{child.breed || '(品種未設定)'}{child.manageId ? <span style={{fontWeight: 400, color: 'var(--text-secondary)', fontSize: '0.8125rem', marginLeft: '6px'}}>#{child.manageId}</span> : ''}</div>
                       <div style={{fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', gap: '8px'}}>
-                        {child.sex && <span>{child.sex}</span>}
+                        {child.sex && <span>{child.sex + '\uFE0E'}</span>}
                         <span>{child.status}</span>
                         {child.sowingDate && <span>{child.sowingDate}</span>}
                       </div>
@@ -95,10 +117,15 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
             <div className="card" style={{padding: '16px', marginBottom: '24px', borderColor: 'var(--danger-color)', background: 'rgba(239,68,68,0.04)'}}>
               <p style={{marginBottom: '12px', fontWeight: 600, color: 'var(--danger-color)'}}>本当に削除しますか？この操作は取り消せません。</p>
               <div style={{display: 'flex', gap: '8px'}}>
-                <button className="btn" style={{flex: 1, background: 'var(--danger-color)', color: '#fff', border: 'none'}} onClick={() => deleteIndividual(id)}>
-                  <Icon name="trash-2" size={16}/> 削除する
+                <button
+                  className="btn"
+                  style={{flex: 1, background: 'var(--danger-color)', color: '#fff', border: 'none', opacity: isDeleting ? 0.6 : 1}}
+                  disabled={isDeleting}
+                  onClick={async () => { setIsDeleting(true); await deleteIndividual(id); }}
+                >
+                  <Icon name="trash-2" size={16}/> {isDeleting ? '削除中...' : '削除する'}
                 </button>
-                <button className="btn btn-secondary" style={{flex: 1}} onClick={() => setConfirmDelete(false)}>キャンセル</button>
+                <button className="btn btn-secondary" style={{flex: 1}} onClick={() => setConfirmDelete(false)} disabled={isDeleting}>キャンセル</button>
               </div>
             </div>
           ) : (
@@ -142,7 +169,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
             overflow: 'hidden',
           }}>
             {/* Corner ornaments */}
-            {['0 0', '0 auto', 'auto 0', 'auto auto'].map((pos, i) => (
+            {[0,1,2,3].map(i => (
               <div key={i} style={{
                 position: 'absolute',
                 top: i < 2 ? '10px' : 'auto',
@@ -158,15 +185,9 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
 
             {/* Header */}
             <div style={{textAlign: 'center', marginBottom: '20px'}}>
-              <div style={{fontSize: '0.625rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a84c', fontWeight: 700, marginBottom: '6px'}}>
-                BOTANICAL BREED
-              </div>
-              <div style={{fontSize: '1.5rem', fontWeight: 800, letterSpacing: '0.05em', color: '#2c2214', lineHeight: 1.2, marginBottom: '4px'}}>
-                交配証明書
-              </div>
-              <div style={{fontSize: '0.75rem', letterSpacing: '0.15em', color: '#8a7050', fontStyle: 'italic'}}>
-                Certificate of Breeding
-              </div>
+              <div style={{fontSize: '0.625rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a84c', fontWeight: 700, marginBottom: '6px'}}>BOTANICAL BREED</div>
+              <div style={{fontSize: '1.5rem', fontWeight: 800, letterSpacing: '0.05em', color: '#2c2214', lineHeight: 1.2, marginBottom: '4px'}}>交配証明書</div>
+              <div style={{fontSize: '0.75rem', letterSpacing: '0.15em', color: '#8a7050', fontStyle: 'italic'}}>Certificate of Breeding</div>
             </div>
 
             {/* Gold divider */}
@@ -179,16 +200,11 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
             {/* Plant image */}
             {individual.imageUrl && (
               <div style={{textAlign: 'center', marginBottom: '20px'}}>
-                <img src={individual.imageUrl} style={{
-                  width: '160px', height: '160px', objectFit: 'cover',
-                  borderRadius: '50%',
-                  border: '3px solid #c9a84c',
-                  boxShadow: '0 4px 16px rgba(201,168,76,0.3)',
-                }} />
+                <img src={individual.imageUrl} style={{width: '160px', height: '160px', objectFit: 'cover', borderRadius: '50%', border: '3px solid #c9a84c', boxShadow: '0 4px 16px rgba(201,168,76,0.3)'}} />
               </div>
             )}
 
-            {/* Individual name block */}
+            {/* Individual block */}
             <div style={{textAlign: 'center', marginBottom: '20px'}}>
               <div style={{fontSize: '0.6875rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#8a7050', marginBottom: '6px'}}>Individual</div>
               <div style={{fontSize: '1.625rem', fontWeight: 800, letterSpacing: '-0.01em', color: '#2c2214', fontStyle: 'italic'}}>{individual.breed || '(品種未設定)'}</div>
@@ -210,11 +226,10 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
               ))}
             </div>
 
-            {/* Parents section */}
+            {/* Parents */}
             <div style={{marginBottom: '20px'}}>
               <div style={{textAlign: 'center', fontSize: '0.6875rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#8a7050', marginBottom: '12px'}}>Parentage</div>
               <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-                {/* Mother */}
                 <div style={{flex: 1, textAlign: 'center'}}>
                   {mother && mother.imageUrl ? (
                     <img src={mother.imageUrl} style={{width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #c9a84c', marginBottom: '6px'}} />
@@ -224,9 +239,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
                   <div style={{fontSize: '0.8125rem', fontWeight: 700, color: '#2c2214'}}>{mother ? (mother.manageId ? `#${mother.manageId}` : mother.breed || '未設定') : '未設定'}</div>
                   <div style={{fontSize: '0.6875rem', color: '#c0392b', letterSpacing: '0.05em'}}>母親</div>
                 </div>
-                {/* × mark */}
                 <div style={{flexShrink: 0, width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(201,168,76,0.15)', border: '1px solid #c9a84c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 800, color: '#c9a84c'}}>×</div>
-                {/* Father */}
                 <div style={{flex: 1, textAlign: 'center'}}>
                   {father && father.imageUrl ? (
                     <img src={father.imageUrl} style={{width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #c9a84c', marginBottom: '6px'}} />
@@ -256,19 +269,29 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
             </div>
           </div>
 
-          <button className="btn btn-secondary mt-4" style={{marginTop: '16px'}} onClick={() => window.print()}><Icon name="printer" size={18}/> 印刷 / PDF保存</button>
+          {/* SNSシェア */}
+          <div style={{marginTop: '16px', padding: '16px', borderRadius: '12px', background: 'var(--surface-color)', border: '1px solid var(--border-color)', textAlign: 'center'}}>
+            <p style={{fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '12px'}}>スクリーンショットを撮ってSNSでシェアできます</p>
+            {typeof navigator !== 'undefined' && navigator.share && (
+              <button
+                className="btn btn-primary"
+                style={{width: 'auto', padding: '10px 24px'}}
+                onClick={() => navigator.share({ title: `交配証明書 — ${individual.breed || individual.manageId || 'Botanical Breed'}`, url: window.location.href })}
+              >
+                <Icon name="globe" size={16}/> シェア
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {viewMode === "editForm" && (
-        <div>
-          <IndividualForm
-            initialData={individual}
-            individuals={individuals}
-            onSave={(data) => { updateIndividual(data); setViewMode("detail"); }}
-            onCancel={() => setViewMode("detail")}
-          />
-        </div>
+        <IndividualForm
+          initialData={individual}
+          individuals={individuals}
+          onSave={async (data) => { await updateIndividual(data); setViewMode("detail"); }}
+          onCancel={() => setViewMode("detail")}
+        />
       )}
     </div>
   );

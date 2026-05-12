@@ -16,6 +16,15 @@ function Dashboard({ individuals, onSelect, onNew }) {
   const [sortBy, setSortBy] = useState("newest");
   const categories = useMemo(() => Array.from(new Set(individuals.map(i => i.category).filter(Boolean))), [individuals]);
 
+  const offspringCount = useMemo(() => {
+    const counts = {};
+    individuals.forEach(i => {
+      if (i.motherId) counts[i.motherId] = (counts[i.motherId] || 0) + 1;
+      if (i.fatherId) counts[i.fatherId] = (counts[i.fatherId] || 0) + 1;
+    });
+    return counts;
+  }, [individuals]);
+
   const filtered = useMemo(() => {
     const f = individuals.filter(i => {
       const matchSearch = (i.manageId || '').toLowerCase().includes(search.toLowerCase()) || (i.breed || '').toLowerCase().includes(search.toLowerCase()) || (i.category || '').toLowerCase().includes(search.toLowerCase()) || i.id.includes(search);
@@ -151,7 +160,14 @@ function Dashboard({ individuals, onSelect, onNew }) {
                                    {i.manageId && <div style={{fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '2px', fontFamily: 'monospace'}}>#{i.manageId}</div>}
                                    <div className="flex justify-between text-secondary" style={{fontSize: '0.8125rem'}}>
                                      <span>{i.status}</span>
-                                     <span>{i.sowingDate}</span>
+                                     <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                                       {i.sowingDate && <span>{i.sowingDate}</span>}
+                                       {offspringCount[i.id] > 0 && (
+                                         <span style={{background: 'rgba(5,150,105,0.1)', color: 'var(--accent-color)', borderRadius: '20px', padding: '1px 7px', fontSize: '0.75rem', fontWeight: 700}}>
+                                           子株 {offspringCount[i.id]}
+                                         </span>
+                                       )}
+                                     </div>
                                    </div>
                                </div>
                             </div>
