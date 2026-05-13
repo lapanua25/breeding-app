@@ -76,15 +76,22 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
 
       <div className="form-group">
         <label className="form-label">性別</label>
-        <div style={{display: 'flex', gap: '8px'}}>
-          {[{val: '♀', label: '♀\uFE0E'}, {val: '♂', label: '♂\uFE0E'}, {val: '', label: '不明'}].map(opt => (
+        <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+          {[
+            {val: '♀',    label: '♀\uFE0E'},
+            {val: '♂',    label: '♂\uFE0E'},
+            {val: '雌雄同株', label: '雌雄同株'},
+            {val: '',     label: '不明'},
+          ].map(opt => (
             <button
               type="button"
               key={opt.label}
               onClick={() => setData({...data, sex: opt.val})}
               style={{
-                flex: 1, padding: '12px 8px', borderRadius: '10px', cursor: 'pointer', fontSize: '0.9375rem', fontWeight: data.sex === opt.val ? 700 : 400, transition: 'all 0.15s',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', lineHeight: 1,
+                flex: '1 1 calc(50% - 4px)', padding: '12px 8px', borderRadius: '10px', cursor: 'pointer',
+                fontSize: opt.val === '雌雄同株' ? '0.8125rem' : '0.9375rem',
+                fontWeight: data.sex === opt.val ? 700 : 400, transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1,
                 border: `1.5px solid ${data.sex === opt.val ? 'var(--accent-color)' : 'var(--border-color)'}`,
                 background: data.sex === opt.val ? 'rgba(5,150,105,0.08)' : 'transparent',
                 color: data.sex === opt.val ? 'var(--accent-color)' : 'var(--text-secondary)',
@@ -125,22 +132,22 @@ function IndividualForm({ onSave, onCancel, initialData, individuals }) {
         <label className="form-label">母親</label>
         <select name="motherId" className="form-control" value={data.motherId} onChange={handleChange}>
           <option value="">-- 選択なし --</option>
-          {individuals.filter(i => i.id !== data.id && (i.sex === '♀' || !i.sex)).map(i => (
+          {individuals.filter(i => i.id !== data.id && (i.sex === '♀' || i.sex === '雌雄同株' || !i.sex)).map(i => (
             <option key={i.id} value={i.id}>{i.manageId ? `#${i.manageId} ` : ''}{i.breed || '(品種未設定)'}{i.category ? ` [${i.category}]` : ''}</option>
           ))}
         </select>
-        <p style={{fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px'}}>性別が「♀ 雌」または「不明」の個体のみ表示</p>
+        <p style={{fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px'}}>性別が「{'♀\uFE0E'}」「雌雄同株」または「不明」の個体のみ表示</p>
       </div>
 
       <div className="form-group">
         <label className="form-label">父親</label>
         <select name="fatherId" className="form-control" value={data.fatherId} onChange={handleChange}>
           <option value="">-- 選択なし --</option>
-          {individuals.filter(i => i.id !== data.id && (i.sex === '♂' || !i.sex)).map(i => (
+          {individuals.filter(i => i.id !== data.id && (i.sex === '♂' || i.sex === '雌雄同株' || !i.sex)).map(i => (
             <option key={i.id} value={i.id}>{i.manageId ? `#${i.manageId} ` : ''}{i.breed || '(品種未設定)'}{i.category ? ` [${i.category}]` : ''}</option>
           ))}
         </select>
-        <p style={{fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px'}}>性別が「♂ 雄」または「不明」の個体のみ表示</p>
+        <p style={{fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px'}}>性別が「{'♂\uFE0E'}」「雌雄同株」または「不明」の個体のみ表示</p>
       </div>
 
       <div className="form-group">
