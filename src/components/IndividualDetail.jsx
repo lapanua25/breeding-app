@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from './Icon';
 import IndividualForm from './IndividualForm';
+import { supabase } from '../lib/supabase';
 
 const sexLabel = (sex) => (sex === '♀' || sex === '♂') ? sex + '\uFE0E' : (sex || '不明');
 
@@ -15,6 +16,53 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [modalImage, setModalImage] = useState(null);
+
+  // 交配ログ
+  const [crossingLogs, setCrossingLogs] = useState([]);
+  const [showCrossingForm, setShowCrossingForm] = useState(false);
+  const [newLog, setNewLog] = useState({ crossed_at: '', other_id: '', notes: '', role: 'mother' });
+  const [savingLog, setSavingLog] = useState(false);
+
+  useEffect(() => {
+    fetchCrossingLogs();
+    setShowCrossingForm(false);
+  }, [id]);
+
+  const fetchCrossingLogs = async () => {
+    const { data } = await supabase
+      .from('crossing_logs')
+      .select('*')
+      .or(`mother_id.eq.${id},father_id.eq.${id}`)
+      .order('crossed_at', { ascending: false });
+    if (data) setCrossingLogs(data);
+  };
+
+  const saveCrossingLog = async () => {
+    if (!newLog.crossed_at) return;
+    setSavingLog(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const dbData = {
+      user_id: user.id,
+      crossed_at: newLog.crossed_at,
+      mother_id: newLog.role === 'mother' ? id : (newLog.other_id || null),
+      father_id: newLog.role === 'father' ? id : (newLog.other_id || null),
+      notes: newLog.notes || null,
+    };
+    const { error } = await supabase.from('crossing_logs').insert(dbData);
+    if (error) {
+      alert('保存に失敗しました: ' + error.message);
+    } else {
+      setShowCrossingForm(false);
+      setNewLog({ crossed_at: '', other_id: '', notes: '', role: 'mother' });
+      await fetchCrossingLogs();
+    }
+    setSavingLog(false);
+  };
+
+  const deleteCrossingLog = async (logId) => {
+    await supabase.from('crossing_logs').delete().eq('id', logId);
+    await fetchCrossingLogs();
+  };
 
   const individual = individuals.find(i => i.id === id);
   const offspring = individuals.filter(i => i.motherId === id || i.fatherId === id);
@@ -160,6 +208,92 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
             </div>
           )}
 
+          {/* 交配ログ */}
+          <div className="card" style={{padding: '20px', marginBottom: '24px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: (showCrossingForm || crossingLogs.length > 0) ? '16px' : '0'}}>
+              <h2 style={{fontSize: '1rem', margin: 0}}>交配ログ {crossingLogs.length > 0 && <span style={{color: 'var(--text-secondary)', fontWeight: 400}}>({crossingLogs.length}件)</span>}</h2>
+              <button className="btn btn-secondary" style={{padding: '6px 12px', width: 'auto', fontSize: '0.875rem'}}
+                onClick={() => {
+                  setNewLog({ crossed_at: '', other_id: '', notes: '', role: individual.sex === '♂' ? 'father' : 'mother' });
+                  setShowCrossingForm(!showCrossingForm);
+                }}>
+                {showCrossingForm ? 'キャンセル' : '+ 記録する'}
+              </button>
+            </div>
+
+            {showCrossingForm && (
+              <div style={{marginBottom: '16px', padding: '16px', background: 'var(--background-color)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                <div className="form-group" style={{margin: 0}}>
+                  <label className="form-label">交配日 *</label>
+                  <input type="date" className="form-control" value={newLog.crossed_at} onChange={e => setNewLog({...newLog, crossed_at: e.target.value})} />
+                </div>
+                <div className="form-group" style={{margin: 0}}>
+                  <label className="form-label">この個体の役割</label>
+                  <div style={{display: 'flex', gap: '8px'}}>
+                    {[{val: 'mother', label: '母親として'}, {val: 'father', label: '父親として'}].map(r => (
+                      <button key={r.val} type="button" onClick={() => setNewLog({...newLog, role: r.val})}
+                        style={{flex: 1, padding: '10px', borderRadius: '10px', cursor: 'pointer', fontWeight: newLog.role === r.val ? 700 : 400,
+                          border: `1.5px solid ${newLog.role === r.val ? 'var(--accent-color)' : 'var(--border-color)'}`,
+                          background: newLog.role === r.val ? 'rgba(5,150,105,0.08)' : 'transparent',
+                          color: newLog.role === r.val ? 'var(--accent-color)' : 'var(--text-secondary)'}}>
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="form-group" style={{margin: 0}}>
+                  <label className="form-label">交配相手</label>
+                  <select className="form-control" value={newLog.other_id} onChange={e => setNewLog({...newLog, other_id: e.target.value})}>
+                    <option value="">-- 選択なし --</option>
+                    {individuals.filter(i => i.id !== id).map(i => (
+                      <option key={i.id} value={i.id}>{i.manageId ? `#${i.manageId} ` : ''}{i.breed || '(品種未設定)'}{i.category ? ` [${i.category}]` : ''}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group" style={{margin: 0}}>
+                  <label className="form-label">メモ</label>
+                  <textarea className="form-control" rows="2" value={newLog.notes} onChange={e => setNewLog({...newLog, notes: e.target.value})} placeholder="花粉の状態、天候など..." />
+                </div>
+                <button className="btn btn-primary" disabled={!newLog.crossed_at || savingLog} onClick={saveCrossingLog} style={{opacity: savingLog ? 0.7 : 1}}>
+                  {savingLog ? '保存中...' : '保存する'}
+                </button>
+              </div>
+            )}
+
+            {crossingLogs.length === 0 && !showCrossingForm && (
+              <p style={{color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0}}>まだ交配ログがありません</p>
+            )}
+
+            {crossingLogs.length > 0 && (
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                {crossingLogs.map(log => {
+                  const isAsMother = log.mother_id === id;
+                  const otherId = isAsMother ? log.father_id : log.mother_id;
+                  const other = individuals.find(i => i.id === otherId);
+                  return (
+                    <div key={log.id} style={{padding: '12px', borderRadius: '10px', border: '1px solid var(--border-color)', background: 'var(--surface-hover)'}}>
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: log.notes ? '6px' : '0'}}>
+                        <div>
+                          <span style={{fontWeight: 700, fontSize: '0.9375rem'}}>{log.crossed_at}</span>
+                          <span style={{marginLeft: '8px', fontSize: '0.8125rem', color: 'var(--text-secondary)'}}>{isAsMother ? '母親として' : '父親として'}</span>
+                        </div>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                          {other && (
+                            <span style={{fontSize: '0.8125rem', color: 'var(--accent-color)', cursor: 'pointer', fontWeight: 600}} onClick={() => onSelect(other.id)}>
+                              ×{other.breed || '(品種未設定)'}{other.manageId ? ` #${other.manageId}` : ''}
+                            </span>
+                          )}
+                          <button onClick={() => deleteCrossingLog(log.id)} style={{background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: '2px', opacity: 0.6, fontSize: '0.875rem', lineHeight: 1}}>✕</button>
+                        </div>
+                      </div>
+                      {log.notes && <p style={{margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap'}}>{log.notes}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* 削除 */}
           {confirmDelete ? (
             <div className="card" style={{padding: '16px', marginBottom: '24px', borderColor: 'var(--danger-color)', background: 'rgba(239,68,68,0.04)'}}>
@@ -265,7 +399,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
                 { label: '種類', value: individual.category || '未設定' },
                 { label: '性別', value: sexLabel(individual.sex) },
                 { label: '管理番号', value: individual.manageId || '未設定', mono: true },
-                { label: '播種日', value: individual.sowingDate || '不明' },
+                { label: '播種日', value: individual.sowingDate ? `${individual.sowingDate}（${daysElapsed(individual.sowingDate)}日）` : '不明' },
               ].map(row => (
                 <div key={row.label} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid rgba(201,168,76,0.2)'}}>
                   <span style={{fontSize: '0.8125rem', color: '#8a7050', fontWeight: 600, letterSpacing: '0.05em'}}>{row.label}</span>

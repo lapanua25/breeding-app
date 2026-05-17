@@ -7,7 +7,11 @@ const SORT_OPTIONS = [
   { val: 'sowingDesc', label: '播種日↓' },
   { val: 'sowingAsc',  label: '播種日↑' },
   { val: 'breed',      label: '品種順' },
+  { val: 'daysDesc',   label: '経過↓' },
+  { val: 'daysAsc',    label: '経過↑' },
 ];
+
+const calcDays = (d) => d ? Math.floor((Date.now() - new Date(d).getTime()) / 86400000) : null;
 
 function Dashboard({ individuals, onSelect, onNew }) {
   const [search, setSearch] = useState("");
@@ -40,6 +44,8 @@ function Dashboard({ individuals, onSelect, onNew }) {
       if (sortBy === 'sowingDesc') return (b.sowingDate || '').localeCompare(a.sowingDate || '');
       if (sortBy === 'sowingAsc')  return (a.sowingDate || '').localeCompare(b.sowingDate || '');
       if (sortBy === 'breed')      return (a.breed || '').localeCompare(b.breed || '', 'ja');
+      if (sortBy === 'daysDesc')   return (calcDays(b.sowingDate) ?? -1) - (calcDays(a.sowingDate) ?? -1);
+      if (sortBy === 'daysAsc')    return (calcDays(a.sowingDate) ?? Infinity) - (calcDays(b.sowingDate) ?? Infinity);
       return new Date(b.created_at) - new Date(a.created_at); // newest
     });
   }, [individuals, search, selectedCategory, selectedStatus, sortBy]);

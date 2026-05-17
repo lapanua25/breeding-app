@@ -127,7 +127,7 @@ export const isGuestUser = (session) => {
  */
 export const migrateGuestToAuth = async (guestId, newUserId) => {
   try {
-    const tables = ['individuals', 'trait_logs', 'individual_images', 'settings'];
+    const tables = ['individuals', 'trait_logs', 'individual_images', 'settings', 'crossing_logs'];
 
     for (const table of tables) {
       const { error } = await supabase
