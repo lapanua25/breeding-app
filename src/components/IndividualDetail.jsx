@@ -4,6 +4,12 @@ import IndividualForm from './IndividualForm';
 
 const sexLabel = (sex) => (sex === '♀' || sex === '♂') ? sex + '\uFE0E' : (sex || '不明');
 
+const daysElapsed = (sowingDate) => {
+  if (!sowingDate) return null;
+  const diff = Math.floor((Date.now() - new Date(sowingDate).getTime()) / (1000 * 60 * 60 * 24));
+  return diff;
+};
+
 function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteIndividual, onSelect, onDuplicate }) {
   const [viewMode, setViewMode] = useState("detail");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -17,6 +23,13 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
 
   const mother = individuals.find(i => i.id === individual.motherId);
   const father = individuals.find(i => i.id === individual.fatherId);
+
+  const siblings = individuals.filter(i => {
+    if (i.id === id) return false;
+    const sharedMother = individual.motherId && i.motherId === individual.motherId;
+    const sharedFather = individual.fatherId && i.fatherId === individual.fatherId;
+    return sharedMother || sharedFather;
+  });
 
   const renderPedigreeNode = (nodeId, label, depth = 0) => {
     if (!nodeId) return null;
@@ -66,7 +79,7 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
             <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px', fontSize: '0.9375rem'}}>
               <div><strong>性別:</strong> {sexLabel(individual.sex)}</div>
               <div><strong>ステータス:</strong> {individual.status}</div>
-              <div><strong>播種日:</strong> {individual.sowingDate || "未設定"}</div>
+              <div><strong>播種日:</strong> {individual.sowingDate ? <>{individual.sowingDate} <span style={{color: 'var(--text-secondary)', fontSize: '0.8125rem'}}>({daysElapsed(individual.sowingDate)}日)</span></> : "未設定"}</div>
               <div><strong>母親:</strong> {mother ? `${mother.manageId ? `#${mother.manageId} ` : ''}${mother.breed || '(品種未設定)'}` : "未設定"}</div>
               <div><strong>父親:</strong> {father ? `${father.manageId ? `#${father.manageId} ` : ''}${father.breed || '(品種未設定)'}` : "未設定"}</div>
             </div>
@@ -105,6 +118,39 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
                         {child.sex && <span>{sexLabel(child.sex)}</span>}
                         <span>{child.status}</span>
                         {child.sowingDate && <span>{child.sowingDate}</span>}
+                      </div>
+                    </div>
+                    <Icon name="chevron-down" size={16} color="var(--text-secondary)" style={{transform: 'rotate(-90deg)', flexShrink: 0}} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 兄弟株一覧 */}
+          {siblings.length > 0 && (
+            <div className="card" style={{padding: '20px', marginBottom: '24px'}}>
+              <h2 className="mb-4" style={{fontSize: '1rem'}}>兄弟株 <span style={{color: 'var(--text-secondary)', fontWeight: 400}}>({siblings.length}株)</span></h2>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                {siblings.map(sib => (
+                  <div key={sib.id} onClick={() => onSelect(sib.id)}
+                    style={{display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', borderRadius: '10px', border: '1px solid var(--border-color)', cursor: 'pointer', background: 'var(--surface-hover)', transition: 'background 0.15s'}}>
+                    {sib.imageUrl ? (
+                      <img src={sib.imageUrl} style={{width: '44px', height: '44px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0}} loading="lazy" />
+                    ) : (
+                      <div style={{width: '44px', height: '44px', borderRadius: '8px', background: 'var(--background-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0}}>
+                        <Icon name="image" size={20} color="var(--text-secondary)" />
+                      </div>
+                    )}
+                    <div style={{flex: 1, minWidth: 0}}>
+                      <div style={{fontWeight: 700, fontSize: '0.9375rem'}}>{sib.breed || '(品種未設定)'}{sib.manageId ? <span style={{fontWeight: 400, color: 'var(--text-secondary)', fontSize: '0.8125rem', marginLeft: '6px'}}>#{sib.manageId}</span> : ''}</div>
+                      <div style={{fontSize: '0.8125rem', color: 'var(--text-secondary)', display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+                        {sib.sex && <span>{sexLabel(sib.sex)}</span>}
+                        <span>{sib.status}</span>
+                        {sib.sowingDate && <span>{sib.sowingDate}（{daysElapsed(sib.sowingDate)}日）</span>}
+                        {individual.motherId && sib.motherId === individual.motherId && individual.fatherId && sib.fatherId === individual.fatherId && (
+                          <span style={{background: 'rgba(5,150,105,0.1)', color: 'var(--accent-color)', borderRadius: '20px', padding: '1px 7px', fontSize: '0.75rem', fontWeight: 700}}>全血</span>
+                        )}
                       </div>
                     </div>
                     <Icon name="chevron-down" size={16} color="var(--text-secondary)" style={{transform: 'rotate(-90deg)', flexShrink: 0}} />

@@ -13,8 +13,10 @@ function Dashboard({ individuals, onSelect, onNew }) {
   const [search, setSearch] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const categories = useMemo(() => Array.from(new Set(individuals.map(i => i.category).filter(Boolean))), [individuals]);
+  const STATUS_OPTIONS = ['育成中', '譲渡or売却済', '枯死'];
 
   const offspringCount = useMemo(() => {
     const counts = {};
@@ -26,10 +28,12 @@ function Dashboard({ individuals, onSelect, onNew }) {
   }, [individuals]);
 
   const filtered = useMemo(() => {
+    const q = search.toLowerCase();
     const f = individuals.filter(i => {
-      const matchSearch = (i.manageId || '').toLowerCase().includes(search.toLowerCase()) || (i.breed || '').toLowerCase().includes(search.toLowerCase()) || (i.category || '').toLowerCase().includes(search.toLowerCase()) || i.id.includes(search);
+      const matchSearch = !q || (i.manageId || '').toLowerCase().includes(q) || (i.breed || '').toLowerCase().includes(q) || (i.category || '').toLowerCase().includes(q) || i.id.includes(q) || (i.memo || '').toLowerCase().includes(q);
       const matchCategory = selectedCategory ? i.category === selectedCategory : true;
-      return matchSearch && matchCategory;
+      const matchStatus = selectedStatus ? i.status === selectedStatus : true;
+      return matchSearch && matchCategory && matchStatus;
     });
     return [...f].sort((a, b) => {
       if (sortBy === 'oldest')     return new Date(a.created_at) - new Date(b.created_at);
@@ -38,7 +42,7 @@ function Dashboard({ individuals, onSelect, onNew }) {
       if (sortBy === 'breed')      return (a.breed || '').localeCompare(b.breed || '', 'ja');
       return new Date(b.created_at) - new Date(a.created_at); // newest
     });
-  }, [individuals, search, selectedCategory, sortBy]);
+  }, [individuals, search, selectedCategory, selectedStatus, sortBy]);
 
   const grouped = useMemo(() => {
     const groups = {};
@@ -90,7 +94,7 @@ function Dashboard({ individuals, onSelect, onNew }) {
             <input
               type="text"
               className="form-control"
-              placeholder="品種名や管理番号で検索..."
+              placeholder="品種名・管理番号・メモで検索..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               autoFocus
@@ -109,13 +113,19 @@ function Dashboard({ individuals, onSelect, onNew }) {
         </div>
 
         {categories.length > 0 && (
-          <div className="flex gap-2" style={{overflowX: 'auto', paddingBottom: '8px', margin: '0 -8px', padding: '0 8px'}}>
+          <div className="flex gap-2" style={{overflowX: 'auto', paddingBottom: '8px', margin: '0 -8px', padding: '0 8px', marginBottom: '8px'}}>
             <button className={`category-tab ${selectedCategory === "" ? "active" : ""}`} onClick={() => setSelectedCategory("")}>すべて</button>
             {categories.map(c => (
               <button key={c} className={`category-tab ${selectedCategory === c ? "active" : ""}`} onClick={() => setSelectedCategory(c)}>{c}</button>
             ))}
           </div>
         )}
+        <div className="flex gap-2" style={{overflowX: 'auto', paddingBottom: '4px', margin: '0 -8px', padding: '0 8px'}}>
+          <button className={`category-tab ${selectedStatus === "" ? "active" : ""}`} onClick={() => setSelectedStatus("")}>全ステータス</button>
+          {STATUS_OPTIONS.map(s => (
+            <button key={s} className={`category-tab ${selectedStatus === s ? "active" : ""}`} onClick={() => setSelectedStatus(s)}>{s}</button>
+          ))}
+        </div>
       </div>
 
       <div className="list">
