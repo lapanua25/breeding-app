@@ -41,11 +41,12 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
     if (!newLog.crossed_at) return;
     setSavingLog(true);
     const { data: { user } } = await supabase.auth.getUser();
+    const role = crossingRoleFixed || newLog.role;
     const dbData = {
       user_id: user.id,
       crossed_at: newLog.crossed_at,
-      mother_id: newLog.role === 'mother' ? id : (newLog.other_id || null),
-      father_id: newLog.role === 'father' ? id : (newLog.other_id || null),
+      mother_id: role === 'mother' ? id : (newLog.other_id || null),
+      father_id: role === 'father' ? id : (newLog.other_id || null),
       notes: newLog.notes || null,
     };
     const { error } = await supabase.from('crossing_logs').insert(dbData);
@@ -79,18 +80,14 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
     return sharedMother || sharedFather;
   });
 
-  const renderPedigreeNode = (nodeId, label, depth = 0) => {
-    if (!nodeId) return null;
-    const nodeData = individuals.find(i => i.id === nodeId);
-    if (!nodeData) return null;
-    return (
-      <div key={nodeId + label} className="tree-node" style={{'--indent': `${depth * 20}px`}}>
-        <div className="tree-node-label">{label}</div>
-        <div className="tree-node-value">{nodeData.sex ? `${sexLabel(nodeData.sex)} ` : ''}{nodeData.manageId ? `#${nodeData.manageId} ` : ''}{nodeData.breed || '(品種未設定)'}</div>
-        {nodeData.motherId && renderPedigreeNode(nodeData.motherId, "母親", depth + 1)}
-        {nodeData.fatherId && renderPedigreeNode(nodeData.fatherId, "父親", depth + 1)}
-      </div>
-    );
+  // 交配ログ：性別による役割固定 & 相手フィルター
+  const crossingRoleFixed = individual.sex === '♀' ? 'mother' : individual.sex === '♂' ? 'father' : null;
+  const crossingPartnerFilter = (i) => {
+    if (i.id === id) return false;
+    if (individual.sex === '♀') return i.sex === '♂';
+    if (individual.sex === '♂') return i.sex === '♀';
+    if (individual.sex === '雌雄同株') return i.sex === '雌雄同株';
+    return true;
   };
 
   return (
@@ -229,23 +226,29 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
                 </div>
                 <div className="form-group" style={{margin: 0}}>
                   <label className="form-label">この個体の役割</label>
-                  <div style={{display: 'flex', gap: '8px'}}>
-                    {[{val: 'mother', label: '母親として'}, {val: 'father', label: '父親として'}].map(r => (
-                      <button key={r.val} type="button" onClick={() => setNewLog({...newLog, role: r.val})}
-                        style={{flex: 1, padding: '10px', borderRadius: '10px', cursor: 'pointer', fontWeight: newLog.role === r.val ? 700 : 400,
-                          border: `1.5px solid ${newLog.role === r.val ? 'var(--accent-color)' : 'var(--border-color)'}`,
-                          background: newLog.role === r.val ? 'rgba(5,150,105,0.08)' : 'transparent',
-                          color: newLog.role === r.val ? 'var(--accent-color)' : 'var(--text-secondary)'}}>
-                        {r.label}
-                      </button>
-                    ))}
-                  </div>
+                  {crossingRoleFixed ? (
+                    <div style={{padding: '10px 14px', borderRadius: '10px', background: 'rgba(5,150,105,0.08)', border: '1.5px solid var(--accent-color)', color: 'var(--accent-color)', fontWeight: 700}}>
+                      {crossingRoleFixed === 'mother' ? `${'♀\uFE0E'} 母親として（固定）` : `${'♂\uFE0E'} 父親として（固定）`}
+                    </div>
+                  ) : (
+                    <div style={{display: 'flex', gap: '8px'}}>
+                      {[{val: 'mother', label: '母親として'}, {val: 'father', label: '父親として'}].map(r => (
+                        <button key={r.val} type="button" onClick={() => setNewLog({...newLog, role: r.val})}
+                          style={{flex: 1, padding: '10px', borderRadius: '10px', cursor: 'pointer', fontWeight: newLog.role === r.val ? 700 : 400,
+                            border: `1.5px solid ${newLog.role === r.val ? 'var(--accent-color)' : 'var(--border-color)'}`,
+                            background: newLog.role === r.val ? 'rgba(5,150,105,0.08)' : 'transparent',
+                            color: newLog.role === r.val ? 'var(--accent-color)' : 'var(--text-secondary)'}}>
+                          {r.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="form-group" style={{margin: 0}}>
                   <label className="form-label">交配相手</label>
                   <select className="form-control" value={newLog.other_id} onChange={e => setNewLog({...newLog, other_id: e.target.value})}>
                     <option value="">-- 選択なし --</option>
-                    {individuals.filter(i => i.id !== id).map(i => (
+                    {individuals.filter(crossingPartnerFilter).map(i => (
                       <option key={i.id} value={i.id}>{i.manageId ? `#${i.manageId} ` : ''}{i.breed || '(品種未設定)'}{i.category ? ` [${i.category}]` : ''}</option>
                     ))}
                   </select>
@@ -320,20 +323,109 @@ function IndividualDetail({ id, individuals, goBack, updateIndividual, deleteInd
         </>
       )}
 
-      {viewMode === "pedigree" && (
-        <div className="glass card">
-          <button className="btn btn-secondary mb-4" onClick={() => setViewMode("detail")} style={{width: 'auto', padding: '8px 16px'}}><Icon name="arrow-left" size={16}/> 戻る</button>
-          <h2 className="mb-2">家系図</h2>
-          <div className="tree">
-            <div className="tree-node">
-              <div className="tree-node-label">対象個体</div>
-              <div className="tree-node-value">{individual.sex ? `${sexLabel(individual.sex)} ` : ''}{individual.manageId ? `#${individual.manageId} ` : ''}{individual.breed || '(品種未設定)'}</div>
-              {individual.motherId && renderPedigreeNode(individual.motherId, "母親", 1)}
-              {individual.fatherId && renderPedigreeNode(individual.fatherId, "父親", 1)}
+      {viewMode === "pedigree" && (() => {
+        const mom = individuals.find(i => i.id === individual.motherId);
+        const dad = individuals.find(i => i.id === individual.fatherId);
+        const gMomMom = mom ? individuals.find(i => i.id === mom.motherId) : null;
+        const gMomDad = mom ? individuals.find(i => i.id === mom.fatherId) : null;
+        const gDadMom = dad ? individuals.find(i => i.id === dad.motherId) : null;
+        const gDadDad = dad ? individuals.find(i => i.id === dad.fatherId) : null;
+        const hasParents = mom || dad;
+        const hasGrandparents = gMomMom || gMomDad || gDadMom || gDadDad;
+
+        const sc = (sex) => {
+          if (sex === '♀') return { border: '#e74c3c', bg: 'rgba(231,76,60,0.07)', text: '#e74c3c' };
+          if (sex === '♂') return { border: '#2980b9', bg: 'rgba(41,128,185,0.07)', text: '#2980b9' };
+          if (sex === '雌雄同株') return { border: '#7c3aed', bg: 'rgba(124,58,237,0.07)', text: '#7c3aed' };
+          return { border: 'var(--border-color)', bg: 'var(--surface-color)', text: 'var(--text-secondary)' };
+        };
+
+        const PNode = ({ ind, label, size = 'sm', navigable = true }) => {
+          const c = sc(ind?.sex);
+          const imgSize = size === 'lg' ? 72 : size === 'md' ? 52 : 36;
+          const pad = size === 'lg' ? '16px' : size === 'md' ? '12px' : '8px 6px';
+          if (!ind) return (
+            <div style={{flex: 1, border: '1.5px dashed var(--border-color)', borderRadius: '12px', padding: pad, textAlign: 'center', minWidth: 0, opacity: 0.5}}>
+              <div style={{fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px'}}>{label}</div>
+              <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>未設定</div>
             </div>
+          );
+          return (
+            <div onClick={() => navigable && onSelect(ind.id)}
+              style={{flex: 1, border: `1.5px solid ${c.border}`, borderRadius: '12px', padding: pad, background: c.bg, cursor: navigable ? 'pointer' : 'default', textAlign: 'center', minWidth: 0, transition: 'opacity 0.15s'}}>
+              <div style={{fontSize: '0.6rem', color: c.text, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '6px'}}>{label}</div>
+              {ind.imageUrl ? (
+                <img src={ind.imageUrl} style={{width: imgSize, height: imgSize, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${c.border}`, display: 'block', margin: '0 auto 8px'}} loading="lazy" />
+              ) : (
+                <div style={{width: imgSize, height: imgSize, borderRadius: '50%', background: 'var(--background-color)', border: `2px solid ${c.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px'}}>
+                  <Icon name="image" size={size === 'lg' ? 28 : size === 'md' ? 20 : 14} color={c.text} />
+                </div>
+              )}
+              <div style={{fontWeight: 700, fontSize: size === 'lg' ? '1rem' : size === 'md' ? '0.8125rem' : '0.6875rem', marginBottom: '2px', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{ind.breed || '品種未設定'}</div>
+              {ind.manageId && <div style={{fontSize: '0.6rem', color: 'var(--text-secondary)', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>#{ind.manageId}</div>}
+              {ind.sex && <div style={{fontSize: '0.6rem', color: c.text, fontWeight: 700, marginTop: '3px'}}>{sexLabel(ind.sex)}</div>}
+            </div>
+          );
+        };
+
+        return (
+          <div className="glass card" style={{padding: '20px'}}>
+            <button className="btn btn-secondary mb-4" onClick={() => setViewMode("detail")} style={{width: 'auto', padding: '8px 16px'}}><Icon name="arrow-left" size={16}/> 戻る</button>
+            <h2 style={{marginBottom: '20px'}}>家系図</h2>
+
+            {/* 祖父母世代 */}
+            {hasGrandparents && (
+              <>
+                <div style={{display: 'flex', gap: '8px'}}>
+                  <div style={{flex: 1, display: 'flex', gap: '6px'}}>
+                    <PNode ind={gMomMom} label="母方祖母" size="sm" />
+                    <PNode ind={gMomDad} label="母方祖父" size="sm" />
+                  </div>
+                  <div style={{width: '12px'}} />
+                  <div style={{flex: 1, display: 'flex', gap: '6px'}}>
+                    <PNode ind={gDadMom} label="父方祖母" size="sm" />
+                    <PNode ind={gDadDad} label="父方祖父" size="sm" />
+                  </div>
+                </div>
+                {/* 祖父母→親 縦線 */}
+                <div style={{display: 'flex', height: '24px'}}>
+                  <div style={{flex: 1, display: 'flex', justifyContent: 'center'}}>
+                    <div style={{width: '2px', background: 'var(--border-color)'}} />
+                  </div>
+                  <div style={{width: '12px'}} />
+                  <div style={{flex: 1, display: 'flex', justifyContent: 'center'}}>
+                    <div style={{width: '2px', background: 'var(--border-color)'}} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 親世代 */}
+            {hasParents && (
+              <>
+                <div style={{display: 'flex', gap: '8px'}}>
+                  <PNode ind={mom} label="母親" size="md" />
+                  <PNode ind={dad} label="父親" size="md" />
+                </div>
+                {/* 親→対象個体 コネクター */}
+                <div style={{position: 'relative', height: '40px'}}>
+                  <div style={{position: 'absolute', top: 0, left: 'calc(25% + 1px)', right: 'calc(25% + 1px)', height: '2px', background: 'var(--border-color)'}} />
+                  {mom && <div style={{position: 'absolute', top: 0, left: '25%', width: '2px', height: '20px', background: 'var(--border-color)', transform: 'translateX(-50%)'}} />}
+                  {dad && <div style={{position: 'absolute', top: 0, right: '25%', width: '2px', height: '20px', background: 'var(--border-color)', transform: 'translateX(50%)'}} />}
+                  <div style={{position: 'absolute', top: 0, left: '50%', width: '2px', height: '40px', background: 'var(--border-color)', transform: 'translateX(-50%)'}} />
+                </div>
+              </>
+            )}
+
+            {/* 対象個体 */}
+            <PNode ind={individual} label="対象個体" size="lg" navigable={false} />
+
+            {!hasParents && (
+              <p style={{textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '16px'}}>親株の情報が登録されていません</p>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {viewMode === "certificate" && (
         <div style={{background: 'transparent'}}>
